@@ -9,7 +9,6 @@ import numpy as np
 
 @dataclass
 class Landmark:
-    """Represents a single hand landmark."""
     id: int
     x: float
     y: float
@@ -18,7 +17,6 @@ class Landmark:
 
 @dataclass
 class BoundingBox:
-    """Represents a hand bounding box in pixel coordinates."""
     xmin: int
     ymin: int
     width: int
@@ -26,8 +24,22 @@ class BoundingBox:
 
 
 @dataclass
+class DetectedHand:
+    """
+    Raw output from the detector.
+    Used before cropping.
+    """
+    handedness: str
+    confidence: float
+    bounding_box: BoundingBox
+    landmarks: List[Landmark]
+
+
+@dataclass
 class HandData:
-    """Represents one detected hand."""
+    """
+    Final processed hand data.
+    """
     handedness: str
     confidence: float
     bounding_box: BoundingBox
@@ -37,7 +49,6 @@ class HandData:
 
 @dataclass
 class FrameResult:
-    """Output of the Vision Pipeline for one processed frame."""
     frame: np.ndarray = field(repr=False)
     timestamp: float
     fps: float
