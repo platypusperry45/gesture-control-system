@@ -8,6 +8,7 @@ from .builder import DatasetBuilder
 from .splitter import DatasetSplitter
 from .label_encoder import LabelEncoder
 from .scanner import DatasetScanner
+from .tensorflow_dataset import TensorFlowDatasetBuilder
 
 from .models import (
     Sample,
@@ -22,6 +23,7 @@ __all__ = [
     "DatasetSplitter",
     "DatasetScanner",
     "LabelEncoder",
+    "TensorFlowDatasetBuilder",
     "Sample",
     "RawSampleRecord",
     "Dataset",

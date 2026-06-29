@@ -84,8 +84,10 @@ class RawSampleRecord:
 
     gesture: str
 
-    landmark_row: list[str]
-    
+    handedness: str
+
+    landmarks: np.ndarray = field(repr=False)
+
 # ==========================================================
 # Dataset Split
 # ==========================================================

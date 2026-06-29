@@ -5,7 +5,7 @@ Converts RawSampleRecords into Sample objects.
 """
 
 from __future__ import annotations
-
+import numpy as np
 from .label_encoder import LabelEncoder
 from .models import (
     Dataset,
@@ -56,6 +56,15 @@ class DatasetBuilder:
         record,
     ) -> Sample:
 
+        row = record.landmark_row
+
+        handedness = row[1]
+
+        landmarks = np.asarray(
+            row[2:],
+            dtype=np.float32,
+        )
+
         return Sample(
 
             image_path=record.image_path,
@@ -66,8 +75,8 @@ class DatasetBuilder:
                 record.gesture,
             ),
 
-            handedness=record.handedness,
+            handedness=handedness,
 
-            landmarks=record.landmarks,
+            landmarks=landmarks,
 
         )

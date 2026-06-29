@@ -13,7 +13,6 @@ Responsibilities
 """
 
 from __future__ import annotations
-import numpy as np
 import csv
 from pathlib import Path
 
@@ -137,12 +136,6 @@ class DatasetScanner:
 
                 continue
             
-            handedness = row[1]
-
-            landmarks = np.asarray(
-                row[2:],
-                dtype=np.float32,
-            )
             records.append(
 
                 RawSampleRecord(
@@ -151,12 +144,11 @@ class DatasetScanner:
 
                     gesture=gesture,
 
-                    handedness=handedness,
-
-                    landmarks=landmarks,
+                    landmark_row=row,
 
                 )
 
             )
+            
 
         return records
