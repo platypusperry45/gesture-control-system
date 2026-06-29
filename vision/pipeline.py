@@ -44,13 +44,13 @@ class VisionPipeline:
     Main API for the Vision Layer.
     """
 
-    def __init__(self, config: VisionConfig = VisionConfig()):
+    def __init__(self, config: VisionConfig | None = None):
 
-        self.config = config
+        self.config = config or VisionConfig()
 
-        self.detector = MediaPipeHandDetector(config)
+        self.detector = MediaPipeHandDetector(self.config)
 
-        self.cropper = HandCropper(config)
+        self.cropper = HandCropper(self.config)
 
         self.fps_counter = FPSCounter()
 
