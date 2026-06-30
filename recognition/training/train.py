@@ -30,7 +30,9 @@ def main():
     print("Building dataset...")
     print("=" * 60)
 
-    dataset = DatasetBuilder().build()
+    dataset_builder = DatasetBuilder()
+    dataset = dataset_builder.build()
+
 
     splitter = DatasetSplitter()
 
@@ -64,7 +66,7 @@ def main():
     print("=" * 60)
 
     model = GestureRecognitionModel.build_model(
-        num_classes=len(dataset.label_encoder.classes_),
+        num_classes = len(dataset_builder.label_encoder.classes_),
     )
 
     trainer = Trainer(
@@ -110,7 +112,7 @@ def main():
 
         model,
 
-        "recognition/artifacts/trained_models/gesture_recognition.keras",
+        "recognition/artifacts/trained_models/gesture_recognition.h5",
 
     )
 

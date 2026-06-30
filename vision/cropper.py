@@ -23,30 +23,37 @@ class HandCropper:
         bbox: BoundingBox,
     ) -> np.ndarray:
 
-        roi = rgb_frame[
-            bbox.ymin:bbox.ymin + bbox.height,
-            bbox.xmin:bbox.xmin + bbox.width,
-        ]
+        h, w = rgb_frame.shape[:2]
+
+        xmin = max(0, bbox.xmin)
+        ymin = max(0, bbox.ymin)
+
+        xmax = min(w, bbox.xmin + bbox.width)
+        ymax = min(h, bbox.ymin + bbox.height)
+
+        roi = rgb_frame[ymin:ymax, xmin:xmax]
 
         if roi.size == 0:
-            return np.zeros(
-                (
-                    self.target_size[1],
-                    self.target_size[0],
-                    3,
-                ),
-                dtype=np.uint8,
-            )
+           return np.zeros(
+            (
+                self.target_size[1],
+                self.target_size[0],
+                3,
+            ),
+            dtype=np.uint8,
+        )
 
-        h, w = roi.shape[:2]
+        # Get ROI size
+        rh, rw = roi.shape[:2]
 
-        max_dim = max(h, w)
+        # Make square padding
+        max_dim = max(rh, rw)
 
-        pad_top = (max_dim - h) // 2
-        pad_bottom = max_dim - h - pad_top
+        pad_top = (max_dim - rh) // 2
+        pad_bottom = max_dim - rh - pad_top
 
-        pad_left = (max_dim - w) // 2
-        pad_right = max_dim - w - pad_left
+        pad_left = (max_dim - rw) // 2
+        pad_right = max_dim - rw - pad_left
 
         square = cv2.copyMakeBorder(
             roi,
@@ -59,9 +66,9 @@ class HandCropper:
         )
 
         crop = cv2.resize(
-            square,
-            self.target_size,
-            interpolation=cv2.INTER_AREA,
+           square,
+           self.target_size,
+           interpolation=cv2.INTER_AREA,
         )
 
         return crop

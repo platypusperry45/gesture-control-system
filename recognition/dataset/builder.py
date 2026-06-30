@@ -28,7 +28,10 @@ class DatasetBuilder:
         self.encoder = LabelEncoder(
             GESTURES
         )
-
+    @property
+    def label_encoder(self):
+        return self.encoder
+    
     # =====================================================
     # Public API
     # =====================================================

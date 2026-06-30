@@ -103,7 +103,7 @@ class Preprocessor:
     def preprocess(
         self,
         image: np.ndarray,
-        landmarks: list[Landmark],
+        landmarks: np.ndarray,
     ) -> dict:
         """
         Build model-ready input dictionary.

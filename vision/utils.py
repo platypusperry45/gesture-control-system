@@ -14,6 +14,7 @@ from typing import List, Tuple
 
 from .models import BoundingBox, Landmark
 
+import numpy as np
 
 def clamp(value: int, minimum: int, maximum: int) -> int:
     """
@@ -75,14 +76,14 @@ def calculate_bounding_box(
     Calculate bounding box from hand landmarks.
     """
 
-    x_coords = [lm.x for lm in landmarks]
-    y_coords = [lm.y for lm in landmarks]
+    x_coords = np.clip(x_coords, 0, 1)
+    y_coords = np.clip(y_coords, 0, 1)
+    
+    xmin = int(np.min(x_coords) * image_width)
+    xmax = int(np.max(x_coords) * image_width)
+    ymin = int(np.min(y_coords) * image_height)
+    ymax = int(np.max(y_coords) * image_height)
 
-    xmin = int(min(x_coords) * image_width)
-    xmax = int(max(x_coords) * image_width)
-
-    ymin = int(min(y_coords) * image_height)
-    ymax = int(max(y_coords) * image_height)
 
     xmin = clamp(xmin - padding, 0, image_width)
     ymin = clamp(ymin - padding, 0, image_height)

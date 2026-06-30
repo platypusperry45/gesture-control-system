@@ -37,7 +37,7 @@ class GestureClassifier(tf.keras.Model):
 
         self.output_layer = layers.Dense(
             units=num_classes,
-            activation="softmax",
+            activation=None,
             kernel_initializer="glorot_uniform",
             name="gesture_output",
         )

@@ -5,16 +5,13 @@ Converts DatasetBundle objects into tf.data.Dataset pipelines.
 """
 
 from __future__ import annotations
-
+import numpy as np
 import tensorflow as tf
 
 from recognition.training.augmenter import Augmenter
 from recognition.training.config import AugmentationConfig
 
-from .models import (
-    DatasetBundle,
-    DatasetSplit,
-)
+from .models import DatasetSplit
 
 
 class TensorFlowDatasetBuilder:
@@ -163,16 +160,21 @@ class TensorFlowDatasetBuilder:
         image,
     ):
         """
-        Runs the OpenCV augmenter.
-
+        Runs OpenCV augmentation on uint8 images.
         Called through tf.py_function.
         """
 
-        image = self.augmenter(
-            image.numpy()
-        )
+        image = image.numpy()
 
-        return image.astype("float32")
+        # Convert from normalized float32 [0,1] to uint8 [0,255]
+        image = (image * 255.0).astype(np.uint8)
+
+        image = self.augmenter(image)
+
+        # Convert back to normalized float32
+        image = image.astype(np.float32) / 255.0
+
+        return image
     
     def _augment_tf(
         self,
@@ -263,45 +265,25 @@ class TensorFlowDatasetBuilder:
 
     def build(
         self,
-        bundle: DatasetBundle,
-    ):
+        split: DatasetSplit,
+        *,
+        training: bool = False,
+    ) -> tf.data.Dataset:
         """
-        Builds TensorFlow datasets for
-        train, validation and test.
+        Builds a TensorFlow dataset for a single split.
         """
 
-        train = self._build_split(
-            bundle.train,
+        dataset = self._build_split(
+            split,
         )
 
-        validation = self._build_split(
-            bundle.validation,
+        dataset = self._prepare_dataset(
+            dataset,
+            training=training,
         )
 
-        test = self._build_split(
-            bundle.test,
-        )
-
-        train = self._prepare_dataset(
-            train,
-            training=True,
-        )
-
-        validation = self._prepare_dataset(
-            validation,
-            training=False,
-        )
-
-        test = self._prepare_dataset(
-           test,
-           training=False,
-        )
-
-        return (
-          train,
-          validation,
-          test,
-        )
+        return dataset
+    
     @property
     def input_shape(
         self,

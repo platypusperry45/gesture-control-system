@@ -43,7 +43,7 @@ class HandData:
     handedness: str
     confidence: float
     bounding_box: BoundingBox
-    landmarks: List[Landmark]
+    landmarks: np.ndarray
     cropped_image: np.ndarray = field(repr=False)
 
 

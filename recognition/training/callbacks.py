@@ -59,7 +59,7 @@ class CallbackFactory:
 
             filepath=str(
                 self.checkpoint_dir /
-                "best_model.keras"
+                "best.weights.h5"
             ),
 
             monitor=self.checkpoint_config.monitor,
@@ -68,7 +68,7 @@ class CallbackFactory:
 
             save_best_only=self.checkpoint_config.save_best_only,
 
-            save_weights_only=False,
+            save_weights_only=True,
 
             verbose=1,
 
