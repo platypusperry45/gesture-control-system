@@ -1,0 +1,12 @@
+              precision    recall  f1-score   support
+
+   open_palm       0.00      0.00      0.00        95
+        fist       0.00      0.00      0.00        57
+       peace       0.00      0.00      0.00        68
+   thumbs_up       0.00      0.00      0.00        52
+       point       0.00      0.00      0.00        45
+        okay       0.15      1.00      0.26        55
+
+    accuracy                           0.15       372
+   macro avg       0.02      0.17      0.04       372
+weighted avg       0.02      0.15      0.04       372
