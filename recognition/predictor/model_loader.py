@@ -7,8 +7,8 @@ Loads trained GestureRecognitionModel weights.
 from __future__ import annotations
 
 from pathlib import Path
+
 from recognition.network import GestureRecognitionModel
-import tensorflow as tf
 
 
 class ModelLoader:
@@ -20,12 +20,7 @@ class ModelLoader:
         self,
         num_classes: int,
     ):
-
         self.num_classes = num_classes
-
-    # =====================================================
-    # Public API
-    # =====================================================
 
     def load(
         self,
@@ -43,6 +38,6 @@ class ModelLoader:
             num_classes=self.num_classes,
         )
 
-        model.load_weights(str(checkpoint_path))
+        model.load_weights(checkpoint_path)
 
         return model

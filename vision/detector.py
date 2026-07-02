@@ -33,6 +33,10 @@ class MediaPipeHandDetector:
             min_tracking_confidence=config.min_tracking_confidence,
         )
 
+    # =====================================================
+    # Helpers
+    # =====================================================
+
     def _extract_landmarks(self, hand_landmarks) -> List[Landmark]:
         """
         Convert MediaPipe landmarks into our Landmark dataclass.
@@ -41,7 +45,6 @@ class MediaPipeHandDetector:
         landmarks = []
 
         for idx, lm in enumerate(hand_landmarks.landmark):
-
             landmarks.append(
                 Landmark(
                     id=idx,
@@ -53,15 +56,21 @@ class MediaPipeHandDetector:
 
         return landmarks
 
+    # =====================================================
+    # Detection
+    # =====================================================
+
     def detect(self, rgb_frame: np.ndarray) -> List[DetectedHand]:
         """
         Detect hands in an RGB frame.
         """
 
+        # Image dimensions (needed for bounding box calculation)
         image_height, image_width = rgb_frame.shape[:2]
 
+        # Run MediaPipe
         results = self.detector.process(rgb_frame)
-
+        
         detected_hands = []
 
         if not results.multi_hand_landmarks:
@@ -94,6 +103,9 @@ class MediaPipeHandDetector:
 
         return detected_hands
 
-    def close(self):
+    # =====================================================
+    # Cleanup
+    # =====================================================
 
+    def close(self):
         self.detector.close()

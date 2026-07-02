@@ -22,9 +22,9 @@ class TensorFlowDatasetBuilder:
     def __init__(
         self,
         image_size: tuple[int, int] = (224, 224),
-        batch_size: int = 32,
+        batch_size: int = 8,
         shuffle_buffer: int = 1000,
-        cache: bool = True,
+        cache: bool = False,
         augment: bool = True,
     ):
 
@@ -86,7 +86,7 @@ class TensorFlowDatasetBuilder:
         image = self._load_image(
             image_path,
         )
-
+        
         return (
 
             {
@@ -163,7 +163,6 @@ class TensorFlowDatasetBuilder:
         Runs OpenCV augmentation on uint8 images.
         Called through tf.py_function.
         """
-
         image = image.numpy()
 
         # Convert from normalized float32 [0,1] to uint8 [0,255]
@@ -246,15 +245,14 @@ class TensorFlowDatasetBuilder:
         )
 
        if self.cache:
+           dataset = dataset.cache()
 
-        dataset = dataset.cache()
-
-        dataset = dataset.batch(
-            self.batch_size,
+       dataset = dataset.batch(
+           self.batch_size
         )
 
-        dataset = dataset.prefetch(
-            tf.data.AUTOTUNE,
+       dataset = dataset.prefetch(
+           tf.data.AUTOTUNE
         )
 
        return dataset

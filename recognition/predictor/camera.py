@@ -61,14 +61,6 @@ class Camera:
 
             return None
 
-        frame = cv2.cvtColor(
-
-            frame,
-
-            cv2.COLOR_BGR2RGB,
-
-        )
-
         return frame
 
     # =====================================================
@@ -85,18 +77,10 @@ class Camera:
         """
 
         cv2.imshow(
-
             window_name,
-
-            cv2.cvtColor(
-
-                frame,
-
-                cv2.COLOR_RGB2BGR,
-
-            ),
-
+            frame,
         )
+        
 
     # =====================================================
     # Keyboard

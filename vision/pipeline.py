@@ -70,9 +70,11 @@ class VisionPipeline:
         if self.config.mirror_image:
             frame = mirror_frame(frame)
 
+        # Convert for MediaPipe
         rgb_frame = convert_bgr_to_rgb(frame)
 
-        image_height, image_width = rgb_frame.shape[:2]
+        # Detect hands
+        detected_hands = self.detector.detect(rgb_frame)
 
         hands = []
 
@@ -82,14 +84,13 @@ class VisionPipeline:
                 rgb_frame,
                 hand.bounding_box,
             )
-            
+
             landmarks = np.asarray(
                 [[lm.x, lm.y, lm.z] for lm in hand.landmarks],
-                dtype=np.float32
-            ).reshape(-1) 
+                dtype=np.float32,
+            ).reshape(-1)
 
             hands.append(
-
                 HandData(
                     handedness=hand.handedness,
                     confidence=hand.confidence,
@@ -97,7 +98,6 @@ class VisionPipeline:
                     landmarks=landmarks,
                     cropped_image=crop,
                 )
-
             )
 
         fps = self.fps_counter.update()

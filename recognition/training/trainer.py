@@ -189,20 +189,15 @@ class Trainer:
     # Save
     # =====================================================
 
-    def save(
-        self,
-        model: tf.keras.Model,
-        path: str | Path,
-    ):
+
+    def save(self, model, path):
 
         path = Path(path)
 
-        path.parent.mkdir(
+        path.parent.mkdir(parents=True, exist_ok=True)
 
-            parents=True,
+        weights_path = path.with_suffix(".weights.h5")
 
-            exist_ok=True,
+        model.save_weights(weights_path)
 
-        )
-
-        model.save(path)
+        print(f"Model weights saved to {weights_path}")

@@ -12,15 +12,15 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
+import numpy as np
+
 from .models import BoundingBox, Landmark
 
-import numpy as np
 
 def clamp(value: int, minimum: int, maximum: int) -> int:
     """
     Clamp a value between minimum and maximum.
     """
-
     return max(minimum, min(value, maximum))
 
 
@@ -32,19 +32,6 @@ def normalized_to_pixel(
 ) -> Tuple[int, int]:
     """
     Convert normalized MediaPipe coordinates to pixel coordinates.
-
-    Parameters
-    ----------
-    x, y : float
-        Normalized coordinates in range [0,1]
-
-    image_width : int
-    image_height : int
-
-    Returns
-    -------
-    Tuple[int, int]
-        Pixel coordinates.
     """
 
     px = int(x * image_width)
@@ -76,14 +63,27 @@ def calculate_bounding_box(
     Calculate bounding box from hand landmarks.
     """
 
-    x_coords = np.clip(x_coords, 0, 1)
-    y_coords = np.clip(y_coords, 0, 1)
-    
+    if not landmarks:
+        return BoundingBox(
+            xmin=0,
+            ymin=0,
+            width=0,
+            height=0,
+        )
+
+    # Extract normalized coordinates
+    x_coords = np.array([lm.x for lm in landmarks], dtype=np.float32)
+    y_coords = np.array([lm.y for lm in landmarks], dtype=np.float32)
+
+    # Ensure values remain inside the image
+    x_coords = np.clip(x_coords, 0.0, 1.0)
+    y_coords = np.clip(y_coords, 0.0, 1.0)
+
     xmin = int(np.min(x_coords) * image_width)
     xmax = int(np.max(x_coords) * image_width)
+
     ymin = int(np.min(y_coords) * image_height)
     ymax = int(np.max(y_coords) * image_height)
-
 
     xmin = clamp(xmin - padding, 0, image_width)
     ymin = clamp(ymin - padding, 0, image_height)
@@ -94,8 +94,8 @@ def calculate_bounding_box(
     return BoundingBox(
         xmin=xmin,
         ymin=ymin,
-        width=xmax - xmin,
-        height=ymax - ymin,
+        width=max(0, xmax - xmin),
+        height=max(0, ymax - ymin),
     )
 
 

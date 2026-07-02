@@ -37,17 +37,11 @@ class Visualizer:
         y2 = y1 + bbox.height
 
         cv2.rectangle(
-
             image,
-
             (x1, y1),
-
             (x2, y2),
-
             color,
-
             thickness,
-
         )
 
     # =====================================================
@@ -65,30 +59,20 @@ class Visualizer:
 
         bbox = prediction["bounding_box"]
 
-        label = prediction["gesture"]
-
-        confidence = prediction["confidence"]
-
-        text = f"{label} ({confidence:.2f})"
+        text = (
+            f"{prediction['gesture']} "
+            f"({prediction['confidence']:.2f})"
+        )
 
         cv2.putText(
-
             image,
-
             text,
-
             (bbox.xmin, max(25, bbox.ymin - 10)),
-
             cv2.FONT_HERSHEY_SIMPLEX,
-
             0.7,
-
             (0, 255, 0),
-
             2,
-
             cv2.LINE_AA,
-
         )
 
     # =====================================================
@@ -103,37 +87,58 @@ class Visualizer:
         color=(0, 0, 255),
     ) -> None:
         """
-        Draw hand landmarks.
+        Draw landmarks.
+
+        Supports:
+        - list[Landmark]
+        - ndarray (21,3)
+        - ndarray (63,)
         """
 
         height, width = image.shape[:2]
 
+        # ----------------------------
+        # NumPy array
+        # ----------------------------
+        if isinstance(landmarks, np.ndarray):
+
+            if landmarks.shape == (63,):
+                landmarks = landmarks.reshape(21, 3)
+
+            elif landmarks.shape != (21, 3):
+                raise ValueError(
+                    f"Unsupported landmark shape: {landmarks.shape}"
+                )
+
+            for x, y, _ in landmarks:
+
+                cv2.circle(
+                    image,
+                    (
+                        int(x * width),
+                        int(y * height),
+                    ),
+                    radius,
+                    color,
+                    -1,
+                )
+
+            return
+
+        # ----------------------------
+        # Landmark objects
+        # ----------------------------
         for landmark in landmarks:
 
-            x = int(
-
-                landmark.x * width
-
-            )
-
-            y = int(
-
-                landmark.y * height
-
-            )
-
             cv2.circle(
-
                 image,
-
-                (x, y),
-
+                (
+                    int(landmark.x * width),
+                    int(landmark.y * height),
+                ),
                 radius,
-
                 color,
-
                 -1,
-
             )
 
     # =====================================================
@@ -147,31 +152,22 @@ class Visualizer:
         landmarks,
     ) -> np.ndarray:
         """
-        Draw everything.
+        Draw complete prediction.
         """
 
         self.draw_bounding_box(
-
             image,
-
             prediction["bounding_box"],
-
         )
 
         self.draw_prediction(
-
             image,
-
             prediction,
-
         )
 
         self.draw_landmarks(
-
             image,
-
             landmarks,
-
         )
 
         return image

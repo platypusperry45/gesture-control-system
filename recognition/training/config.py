@@ -35,7 +35,7 @@ class AugmentationConfig:
     perspective_probability: float = 0.20
     perspective_scale: float = 0.08
 
-    horizontal_flip_probability: float = 0.20
+    horizontal_flip_probability: float = 0.00
 
     # Lighting
     brightness_probability: float = 0.50

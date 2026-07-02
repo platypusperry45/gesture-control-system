@@ -95,7 +95,14 @@ class LabelEncoder:
     def classes(self) -> list[str]:
 
         return self._gestures.copy()
-
+    
+    @property
+    def classes_(self) -> list[str]:
+        """
+        Compatibility with sklearn.preprocessing.LabelEncoder.
+        """
+        return self.classes
+    
     @property
     def num_classes(self) -> int:
 

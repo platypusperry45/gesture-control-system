@@ -10,8 +10,6 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from vision.models import Landmark
-
 
 class Preprocessor:
     """
@@ -22,7 +20,6 @@ class Preprocessor:
         self,
         image_size: tuple[int, int] = (224, 224),
     ):
-
         self.image_size = image_size
 
     # =====================================================
@@ -34,17 +31,16 @@ class Preprocessor:
         image: np.ndarray,
     ) -> np.ndarray:
         """
-        Resize and normalize image.
+        Resize and normalize cropped hand image.
         """
-
+        cv2.imwrite("debug_crop.png", image)
         image = cv2.resize(
             image,
             self.image_size,
+            interpolation=cv2.INTER_LINEAR,
         )
 
-        image = image.astype(
-            np.float32,
-        )
+        image = image.astype(np.float32)
 
         image /= 255.0
 
@@ -56,45 +52,72 @@ class Preprocessor:
 
     @staticmethod
     def preprocess_landmarks(
-        landmarks: list[Landmark],
+        landmarks,
     ) -> np.ndarray:
         """
-        Convert Landmark objects into a (63,) float32 vector.
+        Convert landmarks into a normalized (63,) vector.
 
-        Output format:
-        [x1,y1,z1,x2,y2,z2,...,x21,y21,z21]
+        Supports:
+            - list[Landmark]
+            - ndarray (21,3)
+            - ndarray (63,)
         """
 
-        if len(landmarks) != 21:
+        # ----------------------------
+        # Convert to (21,3)
+        # ----------------------------
 
-            raise ValueError(
-                f"Expected 21 landmarks, got {len(landmarks)}."
-            )
+        if isinstance(landmarks, np.ndarray):
 
-        values = []
+            landmarks = landmarks.astype(np.float32)
 
-        for landmark in landmarks:
+            if landmarks.shape == (63,):
+                landmarks = landmarks.reshape(21, 3)
 
-            values.extend(
+            elif landmarks.shape != (21, 3):
+                raise ValueError(
+                    f"Unsupported landmark shape: {landmarks.shape}"
+                )
+
+        else:
+
+            if len(landmarks) != 21:
+                raise ValueError(
+                    f"Expected 21 landmarks, got {len(landmarks)}."
+                )
+
+            landmarks = np.asarray(
                 [
-                    landmark.x,
-                    landmark.y,
-                    landmark.z,
-                ]
+                    [lm.x, lm.y, lm.z]
+                    for lm in landmarks
+                ],
+                dtype=np.float32,
             )
 
-        values = np.asarray(
-            values,
-            dtype=np.float32,
+        # ----------------------------
+        # Translation normalization
+        # Wrist becomes origin
+        # ----------------------------
+
+        wrist = landmarks[0].copy()
+
+        landmarks = landmarks - wrist
+
+        # ----------------------------
+        # Scale normalization
+        # ----------------------------
+
+        distances = np.linalg.norm(
+            landmarks[:, :2],
+            axis=1,
         )
 
-        if values.shape != (63,):
+        scale = np.max(distances)
 
-            raise ValueError(
-                f"Expected landmark vector of shape (63,), got {values.shape}."
-            )
+        if scale > 1e-6:
+            landmarks /= scale
 
-        return values
+        return landmarks.reshape(63).astype(np.float32)
 
     # =====================================================
     # Model Input
@@ -103,7 +126,7 @@ class Preprocessor:
     def preprocess(
         self,
         image: np.ndarray,
-        landmarks: np.ndarray,
+        landmarks,
     ) -> dict:
         """
         Build model-ready input dictionary.
@@ -118,15 +141,12 @@ class Preprocessor:
         )
 
         return {
-
-            "image": tf.expand_dims(
-                image,
-                axis=0,
+            "image": tf.convert_to_tensor(
+                image[np.newaxis, ...],
+                dtype=tf.float32,
             ),
-
-            "landmarks": tf.expand_dims(
-                landmarks,
-                axis=0,
+            "landmarks": tf.convert_to_tensor(
+                landmarks[np.newaxis, ...],
+                dtype=tf.float32,
             ),
-
         }

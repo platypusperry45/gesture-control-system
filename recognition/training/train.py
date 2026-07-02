@@ -7,7 +7,12 @@ python -m recognition.training.train
 """
 
 from __future__ import annotations
+import os
 
+
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+import tensorflow as tf
 from recognition.dataset import (
     DatasetBuilder,
     DatasetSplitter,
@@ -23,6 +28,8 @@ from recognition.training import (
     TrainingConfig,
 )
 
+from collections import Counter
+
 
 def main():
 
@@ -32,7 +39,25 @@ def main():
 
     dataset_builder = DatasetBuilder()
     dataset = dataset_builder.build()
+    print("\n================ LABEL ORDER (TRAINING) ================\n")
+    print(dataset_builder.label_encoder.classes_)
+    print("Num classes:", len(dataset_builder.label_encoder.classes_))
+    print("========================================================\n")
 
+    print("=" * 60)
+    print("DATASET DEBUG")
+    print("=" * 60)
+
+    counts = Counter(sample.gesture for sample in dataset.samples)
+
+    print(counts)
+
+    print()
+
+    print("Number of classes:", len(counts))
+    print("Classes:", sorted(counts.keys()))
+   
+    print("=" * 60)
 
     splitter = DatasetSplitter()
 
@@ -44,7 +69,10 @@ def main():
     print("Creating TensorFlow datasets...")
     print("=" * 60)
 
-    tf_builder = TensorFlowDatasetBuilder()
+    tf_builder = TensorFlowDatasetBuilder(
+        batch_size=8,
+        cache=False,
+    )
 
     train_dataset = tf_builder.build(
         bundle.train,
@@ -68,6 +96,8 @@ def main():
     model = GestureRecognitionModel.build_model(
         num_classes = len(dataset_builder.label_encoder.classes_),
     )
+    
+    class_names = dataset_builder.label_encoder.classes_
 
     trainer = Trainer(
         training_config=TrainingConfig(),

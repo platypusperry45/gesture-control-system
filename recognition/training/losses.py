@@ -14,7 +14,7 @@ class LossFactory:
 
     @staticmethod
     def sparse_categorical_crossentropy(
-        from_logits: bool = False,
+        from_logits: bool = True,
     ) -> tf.keras.losses.Loss:
 
         return tf.keras.losses.SparseCategoricalCrossentropy(

@@ -70,5 +70,5 @@ class HandCropper:
            self.target_size,
            interpolation=cv2.INTER_AREA,
         )
-
+        cv2.imwrite("debug_crop.png", crop)
         return crop

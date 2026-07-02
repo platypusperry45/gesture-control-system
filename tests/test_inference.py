@@ -1,13 +1,16 @@
-import sys
-import os
+from pathlib import Path
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from recognition.predictor.inference import InferenceEngine
+from recognition.config import GESTURES
+
+MODEL_PATH = Path(
+    "recognition/artifacts/trained_models/gesture_recognition.weights.h5"
+)
 
 engine = InferenceEngine(
-    checkpoint_path="path/to/model.h5",
-    class_names=["class1", "class2", "class3"],
-    camera_source=0
+    checkpoint_path=MODEL_PATH,
+    class_names=GESTURES,
+    camera_source=0,
 )
 
 engine.run()
