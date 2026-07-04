@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 
 import { Grid } from "@mui/material";
 
+import { motion } from "framer-motion";
+
 import api from "../services/api";
 
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/DashboardLayout.jsx";
 
 import CameraCard from "../components/cards/CameraCard";
 import PredictionCard from "../components/cards/PredictionCard";
@@ -12,6 +14,9 @@ import StatusCard from "../components/cards/StatusCard";
 import MetricsCard from "../components/cards/MetricsCard";
 import ControlPanel from "../components/cards/ControlPanel";
 import RecentGestures from "../components/cards/RecentGestures";
+
+import PageContainer from "../components/ui/PageContainer";
+import SectionHeader from "../components/ui/SectionHeader";
 
 export default function Dashboard() {
 
@@ -60,7 +65,7 @@ export default function Dashboard() {
 
                             ...previous,
 
-                        ].slice(0,10);
+                        ].slice(0, 10);
 
                     });
 
@@ -68,7 +73,7 @@ export default function Dashboard() {
 
             }
 
-            catch(err){
+            catch (err) {
 
                 console.log(err);
 
@@ -78,55 +83,141 @@ export default function Dashboard() {
 
         load();
 
-        const timer = setInterval(load,1000);
+        const timer = setInterval(load, 1000);
 
-        return ()=>clearInterval(timer);
+        return () => clearInterval(timer);
 
-    },[]);
+    }, []);
 
     return (
 
         <DashboardLayout>
 
-            <Grid container spacing={3}>
+            <motion.div
 
-                <Grid size={{xs:12,lg:8}}>
+                initial={{ opacity: 0, y: 20 }}
 
-                    <CameraCard/>
+                animate={{ opacity: 1, y: 0 }}
 
-                </Grid>
+                transition={{ duration: .45 }}
 
-                <Grid size={{xs:12,lg:4}}>
+            >
 
-                    <PredictionCard status={status}/>
+                <PageContainer>
 
-                </Grid>
+                    <SectionHeader
 
-                <Grid size={{xs:12,md:4}}>
+                        title="Dashboard"
 
-                    <StatusCard status={status}/>
+                        subtitle="Monitor real-time gesture recognition, desktop automation and AI system performance."
 
-                </Grid>
+                    />
 
-                <Grid size={{xs:12,md:4}}>
+                    <Grid
 
-                    <MetricsCard status={status}/>
+                        container
 
-                </Grid>
+                        spacing={3.5}
 
-                <Grid size={{xs:12,md:4}}>
+                        alignItems="stretch"
 
-                    <ControlPanel/>
+                    >
 
-                </Grid>
+                        <Grid
 
-                <Grid size={12}>
+                            size={{
 
-                    <RecentGestures history={history}/>
+                                xs: 12,
 
-                </Grid>
+                                lg: 8,
 
-            </Grid>
+                            }}
+
+                        >
+
+                            <CameraCard />
+
+                        </Grid>
+
+                        <Grid
+
+                            size={{
+
+                                xs: 12,
+
+                                lg: 4,
+
+                            }}
+
+                        >
+
+                            <PredictionCard status={status} />
+
+                        </Grid>
+
+                        <Grid
+
+                            size={{
+
+                                xs: 12,
+
+                                md: 4,
+
+                            }}
+
+                        >
+
+                            <StatusCard status={status} />
+
+                        </Grid>
+
+                        <Grid
+
+                            size={{
+
+                                xs: 12,
+
+                                md: 5,
+
+                            }}
+
+                        >
+
+                            <MetricsCard status={status} />
+
+                        </Grid>
+
+                        <Grid
+
+                            size={{
+
+                                xs: 12,
+
+                                md: 3,
+
+                            }}
+
+                        >
+
+                            <ControlPanel />
+
+                        </Grid>
+
+                        <Grid
+
+                            size={12}
+
+                        >
+
+                            <RecentGestures history={history} />
+
+                        </Grid>
+
+                    </Grid>
+
+                </PageContainer>
+
+            </motion.div>
 
         </DashboardLayout>
 

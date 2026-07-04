@@ -1,49 +1,30 @@
-import {
-
-    Chip,
-
-    Stack,
-
-} from "@mui/material";
+import { Stack } from "@mui/material";
 
 import DashboardCard from "./DashboardCard";
+import StatusBadge from "../ui/StatusBadge";
 
-export default function StatusCard({status}){
-
-    return(
-
-        <DashboardCard title="System Status">
-
+export default function StatusCard({ status }) {
+    return (
+        <DashboardCard
+            title="System Status"
+            subtitle="Live backend health"
+        >
             <Stack spacing={2}>
-
-                <Chip
-
-                    color={status.camera?"success":"error"}
-
-                    label={status.camera?"Camera Online":"Camera Offline"}
-
+                <StatusBadge
+                    status={status.camera ? "online" : "offline"}
+                    label={status.camera ? "Camera Online" : "Camera Offline"}
                 />
 
-                <Chip
-
-                    color={status.model_loaded?"success":"error"}
-
-                    label={status.model_loaded?"Model Loaded":"Model Missing"}
-
+                <StatusBadge
+                    status={status.model_loaded ? "healthy" : "offline"}
+                    label={status.model_loaded ? "Model Loaded" : "Model Missing"}
                 />
 
-                <Chip
-
-                    color={status.inference_running?"success":"warning"}
-
-                    label={status.inference_running?"Inference Running":"Stopped"}
-
+                <StatusBadge
+                    status={status.inference_running ? "running" : "stopped"}
+                    label={status.inference_running ? "Inference Running" : "Inference Stopped"}
                 />
-
             </Stack>
-
         </DashboardCard>
-
     );
-
 }

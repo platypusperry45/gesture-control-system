@@ -1,40 +1,53 @@
-import { Stack, Button } from "@mui/material";
+import { Stack } from "@mui/material";
+
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import StopIcon from "@mui/icons-material/Stop";
+import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
+
 import DashboardCard from "./DashboardCard";
+import GradientButton from "../ui/GradientButton";
 
-export default function ControlPanel(){
-
-    return(
-
-        <DashboardCard title="Controls">
-
+export default function ControlPanel() {
+    return (
+        <DashboardCard
+            title="Controls"
+            subtitle="System operations"
+        >
             <Stack spacing={2}>
-
-                <Button
-                    variant="contained"
+                <GradientButton
                     fullWidth
+                    startIcon={<PlayArrowIcon />}
                 >
-                    Start
-                </Button>
+                    Start Inference
+                </GradientButton>
 
-                <Button
-                    variant="outlined"
+                <GradientButton
                     fullWidth
+                    color="inherit"
+                    startIcon={<StopIcon />}
+                    sx={{
+                        background: "#1E293B",
+                        boxShadow: "none",
+
+                        "&:hover": {
+                            background: "#334155",
+                        },
+                    }}
                 >
                     Stop
-                </Button>
+                </GradientButton>
 
-                <Button
-                    color="secondary"
-                    variant="outlined"
+                <GradientButton
                     fullWidth
+                    startIcon={<ModelTrainingIcon />}
+                    sx={{
+                        background:
+                            "linear-gradient(135deg,#0EA5E9,#2563EB)",
+                    }}
                 >
                     Retrain Model
-                </Button>
-
+                </GradientButton>
             </Stack>
-
         </DashboardCard>
-
     );
-
 }

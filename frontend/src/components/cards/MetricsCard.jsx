@@ -1,49 +1,34 @@
-import {
+import Grid from "@mui/material/Grid";
 
-    Typography,
-
-    Stack,
-
-} from "@mui/material";
+import SpeedIcon from "@mui/icons-material/Speed";
+import TimerIcon from "@mui/icons-material/Timer";
 
 import DashboardCard from "./DashboardCard";
+import MetricTile from "../ui/MetricTile";
 
-export default function MetricsCard({status}){
+export default function MetricsCard({ status }) {
+    return (
+        <DashboardCard
+            title="Performance"
+            subtitle="Real-time system metrics"
+        >
+            <Grid container spacing={2}>
+                <Grid size={6}>
+                    <MetricTile
+                        icon={<SpeedIcon color="primary" />}
+                        label="FPS"
+                        value={status.fps || "--"}
+                    />
+                </Grid>
 
-    return(
-
-        <DashboardCard title="Performance">
-
-            <Stack spacing={2}>
-
-                <Typography variant="h4">
-
-                    {status.fps}
-
-                </Typography>
-
-                <Typography>
-
-                    FPS
-
-                </Typography>
-
-                <Typography>
-
-                    Uptime
-
-                </Typography>
-
-                <Typography fontWeight={700}>
-
-                    {status.uptime}
-
-                </Typography>
-
-            </Stack>
-
+                <Grid size={6}>
+                    <MetricTile
+                        icon={<TimerIcon color="primary" />}
+                        label="Uptime"
+                        value={status.uptime}
+                    />
+                </Grid>
+            </Grid>
         </DashboardCard>
-
     );
-
 }

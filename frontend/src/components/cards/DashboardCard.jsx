@@ -1,48 +1,71 @@
-import { Paper, Typography, Box } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+
+import GlassCard from "../ui/GlassCard";
 
 export default function DashboardCard({
     title,
+    subtitle,
+    action,
     children,
     height = "100%",
+    sx = {},
 }) {
-
     return (
-
-        <Paper
-            elevation={0}
+        <GlassCard
             sx={{
-
                 height,
-
-                p:3,
-
-                borderRadius:4,
-
-                bgcolor:"rgba(255,255,255,.04)",
-
-                border:"1px solid rgba(255,255,255,.06)",
-
-                backdropFilter:"blur(20px)",
-
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                ...sx,
             }}
         >
+            {(title || subtitle || action) && (
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="flex-start"
+                    sx={{
+                        mb: 3,
+                    }}
+                >
+                    <Box>
+                        {title && (
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    lineHeight: 1.2,
+                                }}
+                            >
+                                {title}
+                            </Typography>
+                        )}
 
-            <Typography
-                variant="h6"
-                fontWeight={700}
-                mb={2}
+                        {subtitle && (
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ mt: 0.5 }}
+                            >
+                                {subtitle}
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {action}
+                </Stack>
+            )}
+
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                }}
             >
-                {title}
-            </Typography>
-
-            <Box>
-
                 {children}
-
             </Box>
-
-        </Paper>
-
+        </GlassCard>
     );
-
 }

@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 
-import AppHeader from "../components/AppHeader";
-import SideNavigation from "../components/SideNavigation";
+import AppHeader from "../components/layouts/AppHeader";
+import SideNavigation from "../components/layouts/SideNavigation";
 
 export default function Layout({ children }) {
 
