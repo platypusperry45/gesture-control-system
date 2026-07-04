@@ -124,7 +124,7 @@ class Visualization:
         Visualization._save_figure(
             save_path,
         )
-
+        plt.close(fig)
         return fig
 
     # =====================================================
@@ -203,7 +203,7 @@ class Visualization:
         Visualization._save_figure(
             save_path,
         )
-
+        plt.close(fig)
         return fig
 
     # =====================================================
@@ -252,5 +252,5 @@ class Visualization:
         Visualization._save_figure(
             save_path,
         )
-
+        plt.close(fig)
         return fig

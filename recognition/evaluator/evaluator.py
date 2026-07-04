@@ -42,10 +42,10 @@ class Evaluator:
 
         for inputs, labels in dataset:
 
-            predictions = self.model.predict(
+            predictions = self.model(
                 inputs,
-                verbose=0,
-            )
+                training=False,
+            ).numpy()
 
             predictions = np.argmax(
                 predictions,
@@ -82,7 +82,12 @@ class Evaluator:
         y_true, y_pred = self.predict(
             dataset,
         )
-
+        prediction_df = pd.DataFrame({
+            "true_label": [class_names[i] for i in y_true],
+            "predicted_label": [class_names[i] for i in y_pred],
+            "correct": y_true == y_pred,
+        })
+        
         # ----------------------------
         # Accuracy
         # ----------------------------
@@ -169,6 +174,11 @@ class Evaluator:
 
         if save_dir is not None:
 
+            prediction_df.to_csv(
+                save_dir / "predictions.csv",
+                index=False,
+            )
+            
             save_dir = Path(save_dir)
 
             save_dir.mkdir(
@@ -226,30 +236,42 @@ class Evaluator:
                     report_text
                 )
 
+            metrics = {
+                "accuracy": accuracy,
+                "precision_macro": report_dict["macro avg"]["precision"],
+                "recall_macro": report_dict["macro avg"]["recall"],
+                "f1_macro": report_dict["macro avg"]["f1-score"],
+                "precision_weighted": report_dict["weighted avg"]["precision"],
+                "recall_weighted": report_dict["weighted avg"]["recall"],
+                "f1_weighted": report_dict["weighted avg"]["f1-score"],
+            }
+
             with open(
-
-                save_dir /
-                "metrics.json",
-
+                save_dir / "metrics.json",
                 "w",
-
                 encoding="utf-8",
-
             ) as file:
 
                 json.dump(
-
-                    {
-
-                        "accuracy": accuracy,
-
-                    },
-
+                    metrics,
                     file,
-
                     indent=4,
-
                 )
+
+
+        print("\n" + "=" * 50)
+        print("Evaluation Summary")
+        print("=" * 50)
+
+        print(f"Accuracy            : {accuracy:.2%}")
+        print(f"Macro Precision     : {metrics['precision_macro']:.2%}")
+        print(f"Macro Recall        : {metrics['recall_macro']:.2%}")
+        print(f"Macro F1 Score      : {metrics['f1_macro']:.2%}")
+
+        if save_dir is not None:
+            print(f"\nResults saved to: {save_dir}")
+
+        print("=" * 50 + "\n")  
 
         # ----------------------------
         # Return Everything

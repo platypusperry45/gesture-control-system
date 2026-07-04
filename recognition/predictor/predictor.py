@@ -66,6 +66,7 @@ class Predictor:
         )
 
         probabilities = self._infer(inputs).numpy()[0]
+        
 
         predicted_index = int(np.argmax(probabilities))
         confidence = float(probabilities[predicted_index])

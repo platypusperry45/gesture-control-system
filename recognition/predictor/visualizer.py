@@ -45,7 +45,7 @@ class Visualizer:
         )
 
     # =====================================================
-    # Gesture Label
+    # Prediction Label
     # =====================================================
 
     @staticmethod
@@ -59,19 +59,46 @@ class Visualizer:
 
         bbox = prediction["bounding_box"]
 
-        text = (
-            f"{prediction['gesture']} "
-            f"({prediction['confidence']:.2f})"
+        # Make gesture name human-readable
+        gesture = prediction["gesture"].replace("_", " ").title()
+
+        # Convert confidence to percentage
+        confidence = prediction["confidence"] * 100
+
+        text = f"{gesture} ({confidence:.1f}%)"
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.65
+        thickness = 2
+
+        (text_width, text_height), baseline = cv2.getTextSize(
+            text,
+            font,
+            font_scale,
+            thickness,
         )
 
+        x = bbox.xmin
+        y = max(30, bbox.ymin - 10)
+
+        # Background rectangle
+        cv2.rectangle(
+            image,
+            (x - 4, y - text_height - 6),
+            (x + text_width + 4, y + baseline),
+            (0, 0, 0),
+            -1,
+        )
+
+        # Text
         cv2.putText(
             image,
             text,
-            (bbox.xmin, max(25, bbox.ymin - 10)),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
+            (x, y),
+            font,
+            font_scale,
             (0, 255, 0),
-            2,
+            thickness,
             cv2.LINE_AA,
         )
 
@@ -87,7 +114,7 @@ class Visualizer:
         color=(0, 0, 255),
     ) -> None:
         """
-        Draw landmarks.
+        Draw hand landmarks.
 
         Supports:
         - list[Landmark]

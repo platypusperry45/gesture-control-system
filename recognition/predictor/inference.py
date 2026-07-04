@@ -4,10 +4,13 @@ Real-Time Gesture Recognition Inference.
 
 from __future__ import annotations
 
+import time
+import cv2
 from pathlib import Path
 
 from vision import VisionPipeline
 
+from recognition.actions.action_manager import ActionManager
 from .camera import Camera
 from .model_loader import ModelLoader
 from .predictor import Predictor
@@ -26,7 +29,7 @@ class InferenceEngine:
         camera_source: int | str = 0,
     ):
 
-        print("Loading model...")
+        
 
         self.model = ModelLoader(
             num_classes=len(class_names),
@@ -46,6 +49,9 @@ class InferenceEngine:
         )
         
 
+        self.action_manager = ActionManager()
+        
+
         self.visualizer = Visualizer()
         
 
@@ -56,6 +62,19 @@ class InferenceEngine:
 
         self.running = True
 
+        # -----------------------------------------
+        # Gesture confirmation
+        # -----------------------------------------
+        self.current_gesture = None
+        self.gesture_start_time = None
+        self.action_triggered = False
+
+        # Hold gesture for this many seconds
+        self.confirmation_time = 0.4
+        
+
+        self.last_action = ""
+        self.action_time = 0
     # =====================================================
     # Main Loop
     # =====================================================
@@ -64,43 +83,86 @@ class InferenceEngine:
 
         print("Starting inference loop...")
 
-        frame_count = 0
-
         while self.running:
 
             frame = self.camera.read()
 
-            frame_count += 1
-
-
             if frame is None:
                 break
 
-            
-
             prediction = self.predictor.predict(frame)
 
-            
+            # -----------------------------------------
+            # No hand detected
+            # -----------------------------------------
+            if prediction is None:
 
-            if prediction is not None:
+                self.current_gesture = None
+                self.gesture_start_time = None
+                self.action_triggered = False
 
+            else:
 
+                gesture = prediction["gesture"]
+
+                # Optional confidence threshold
+                if prediction["confidence"] >= 0.90:
+
+                    # New gesture
+                    if gesture != self.current_gesture:
+
+                        self.current_gesture = gesture
+                        self.gesture_start_time = time.time()
+                        self.action_triggered = False
+
+                    else:
+
+                        elapsed = (
+                            time.time()
+                            - self.gesture_start_time
+                        )
+
+                        if (
+                            elapsed >= self.confirmation_time
+                            and not self.action_triggered
+                        ):
+
+                            self.action_manager.execute(
+                                gesture
+                            )
+                            self.last_action = gesture
+                            self.action_time = time.time()
+                            self.action_triggered = True
+
+                else:
+                    # Confidence dropped
+                    self.current_gesture = None
+                    self.gesture_start_time = None
+                    self.action_triggered = False
+
+                # Draw visualization
                 self.visualizer.draw(
                     frame,
                     prediction,
                     prediction["hand"].landmarks,
                 )
 
-            
-                
-
             self.camera.show(
                 "Gesture Recognition",
                 frame,
             )
+            if time.time() - self.action_time < 1.0:
 
+               cv2.putText(
+                   frame,
+                   f"Action : {self.last_action}",
+                   (20, 80),
+                   cv2.FONT_HERSHEY_SIMPLEX,
+                   0.9,
+                   (0,255,0),
+                   2,
+                )
             if self.camera.should_close():
-                print("Q pressed. Closing.")
                 break
 
         self.close()
@@ -111,13 +173,8 @@ class InferenceEngine:
 
     def close(self):
 
-        print("Closing predictor...")
         self.predictor.close()
-
-        print("Closing camera...")
         self.camera.close()
-
-        print("Finished cleanup.")
 
 
 # ==========================================================
@@ -131,12 +188,12 @@ def main():
     )
 
     class_names = [
-         "open_palm",
-         "fist",
-         "peace",
-         "thumbs_up",
-         "point",
-         "okay",
+        "open_palm",
+        "fist",
+        "peace",
+        "thumbs_up",
+        "point",
+        "okay",
     ]
 
     engine = InferenceEngine(

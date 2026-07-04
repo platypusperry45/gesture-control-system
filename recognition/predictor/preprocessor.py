@@ -33,7 +33,7 @@ class Preprocessor:
         """
         Resize and normalize cropped hand image.
         """
-        cv2.imwrite("debug_crop.png", image)
+        
         image = cv2.resize(
             image,
             self.image_size,
