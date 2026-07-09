@@ -9,11 +9,10 @@ from pathlib import Path
 
 from vision import VisionPipeline
 
-from recognition.actions.action_manager import ActionManager
 from .model_loader import ModelLoader
 from .predictor import Predictor
 from .visualizer import Visualizer
-
+ActionManager = None
 
 class InferenceEngine:
     """
@@ -53,7 +52,15 @@ class InferenceEngine:
 
         self.visualizer = Visualizer()
 
-        self.action_manager = ActionManager()
+
+        try:
+           from recognition.actions.action_manager import ActionManager
+
+           self.action_manager = ActionManager()
+
+        except Exception:
+
+           self.action_manager = None
 
         # ---------------------------------------
         # Gesture confirmation
@@ -147,7 +154,9 @@ class InferenceEngine:
 
                     print("[INFO] Executing action...")
 
-                    self.action_manager.execute(gesture)
+                    if self.action_manager:
+
+                       self.action_manager.execute(gesture)
 
                     self.last_action = gesture
                     self.action_time = time.time()
