@@ -3,22 +3,28 @@ import {
     Chip,
     Stack,
     Typography,
+    Fade,
 } from "@mui/material";
 
 import VideocamIcon from "@mui/icons-material/Videocam";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
+import { motion } from "framer-motion";
+
 import GlassCard from "../ui/GlassCard";
 
 export default function CameraCard() {
+
     return (
+
         <GlassCard
             sx={{
                 p: 0,
-                overflow: "hidden",
+                overflow: "auto",
             }}
         >
-            {/* Header */}
+
+            {/* ---------------- Header ---------------- */}
 
             <Stack
                 direction="row"
@@ -31,14 +37,17 @@ export default function CameraCard() {
                         "1px solid rgba(255,255,255,.06)",
                 }}
             >
+
                 <Stack
                     direction="row"
                     spacing={1.5}
                     alignItems="center"
                 >
+
                     <VideocamIcon color="primary" />
 
                     <Box>
+
                         <Typography
                             variant="h6"
                             fontWeight={700}
@@ -52,58 +61,82 @@ export default function CameraCard() {
                         >
                             Real-time gesture detection
                         </Typography>
+
                     </Box>
+
                 </Stack>
 
                 <Chip
+                    color="success"
                     size="small"
+                    label="LIVE"
                     icon={
                         <FiberManualRecordIcon
                             sx={{
-                                fontSize: "12px !important",
+                                fontSize: 12,
+                                animation:
+                                    "pulse 1.4s infinite",
                             }}
                         />
                     }
-                    label="LIVE"
-                    color="success"
                 />
+
             </Stack>
 
-            {/* Camera Feed */}
+            {/* ---------------- Camera ---------------- */}
 
             <Box
                 sx={{
-                    bgcolor: "#05070D",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
                     p: 2,
+                    bgcolor: "#05070D",
                 }}
             >
-                <Box
-                    component="img"
-                    src="http://127.0.0.1:8000/video_feed"
-                    alt="Live Camera"
 
-                    sx={{
-                        width: "100%",
-                        borderRadius: 3,
+                <Fade in timeout={600}>
 
-                        aspectRatio: "16 / 9",
+                    <motion.div
+                        whileHover={{
+                            scale: 1.01,
+                        }}
+                        transition={{
+                            duration: .25,
+                        }}
+                    >
 
-                        objectFit: "cover",
+                        <Box
+                            component="img"
+                            src="http://127.0.0.1:8000/video_feed"
+                            alt="Camera Feed"
+                            sx={{
+                                width: "100%",
+                                aspectRatio: "16/9",
+                                objectFit: "cover",
 
-                        border:
-                            "1px solid rgba(255,255,255,.06)",
-                    }}
-                />
+                                borderRadius: 4,
+
+                                border:
+                                    "1px solid rgba(255,255,255,.08)",
+
+                                boxShadow:
+                                    "0 25px 70px rgba(0,0,0,.45)",
+
+                                transition:
+                                    ".35s",
+                            }}
+                        />
+
+                    </motion.div>
+
+                </Fade>
+
             </Box>
 
-            {/* Footer */}
+            {/* ---------------- Footer ---------------- */}
 
             <Stack
                 direction="row"
                 justifyContent="space-between"
+                alignItems="center"
                 sx={{
                     px: 3,
                     py: 2,
@@ -111,6 +144,7 @@ export default function CameraCard() {
                         "1px solid rgba(255,255,255,.06)",
                 }}
             >
+
                 <Typography
                     variant="body2"
                     color="text.secondary"
@@ -119,11 +153,15 @@ export default function CameraCard() {
                 </Typography>
 
                 <Chip
-                    label="Connected"
                     color="success"
                     size="small"
+                    label="Connected"
                 />
+
             </Stack>
+
         </GlassCard>
+
     );
+
 }

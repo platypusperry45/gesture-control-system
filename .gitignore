@@ -1,20 +1,16 @@
-# Virtual environments
-.venv/
-venv/
+# Archives
+*.zip
+*.rar
+*.7z
 
 # Python
+.venv/
 __pycache__/
-*.py[cod]
-.pytest_cache/
+*.pyc
 
-# VS Code
-.vscode/
+# Frontend
+frontend/node_modules/
+frontend/dist/
 
-# Build artifacts
-build/
-dist/
-*.egg-info/
-
-# OS
-.DS_Store
-Thumbs.db
+# TensorBoard
+logs/

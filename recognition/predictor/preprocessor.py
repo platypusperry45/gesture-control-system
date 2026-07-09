@@ -18,7 +18,7 @@ class Preprocessor:
 
     def __init__(
         self,
-        image_size: tuple[int, int] = (224, 224),
+        image_size: tuple[int, int] = (160, 160),
     ):
         self.image_size = image_size
 

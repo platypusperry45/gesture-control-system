@@ -19,7 +19,7 @@ class AugmentationConfig:
 
     enabled: bool = True
 
-    image_size: tuple[int, int] = (224, 224)
+    image_size: tuple[int, int] = (160, 160)
 
     # Geometry
     rotation_probability: float = 0.50
@@ -72,7 +72,7 @@ class TrainingConfig:
 
     batch_size: int = 32
 
-    epochs: int = 50
+    epochs: int = 20
 
     learning_rate: float = 1e-3
 
@@ -116,7 +116,7 @@ class EarlyStoppingConfig:
 
     monitor: str = "val_loss"
 
-    patience: int = 10
+    patience: int = 8
 
     restore_best_weights: bool = True
 

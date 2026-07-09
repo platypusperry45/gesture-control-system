@@ -7,18 +7,72 @@ import pyautogui
 class KeyboardController:
 
     @staticmethod
-    def screenshot():
+    def hotkey(*keys):
+        """
+        Execute a keyboard shortcut.
 
-        # Create screenshots folder
+        Example:
+            KeyboardController.hotkey("ctrl", "c")
+            KeyboardController.hotkey("alt", "tab")
+            KeyboardController.hotkey("win", "d")
+        """
+
+        try:
+
+            pyautogui.hotkey(*keys)
+
+            print(f"Hotkey executed: {' + '.join(keys)}")
+
+        except Exception as e:
+
+            print(f"Hotkey failed: {e}")
+
+    @staticmethod
+    def press(key):
+        """
+        Press a single keyboard key.
+        """
+
+        try:
+
+            pyautogui.press(key)
+
+            print(f"Key pressed: {key}")
+
+        except Exception as e:
+
+            print(f"Key press failed: {e}")
+
+    @staticmethod
+    def write(text):
+        """
+        Type text.
+        """
+
+        try:
+
+            pyautogui.write(text)
+
+            print(f"Typed: {text}")
+
+        except Exception as e:
+
+            print(f"Typing failed: {e}")
+
+    @staticmethod
+    def screenshot():
+        """
+        Save a timestamped screenshot.
+        """
+
         screenshot_dir = Path("screenshots")
+
         screenshot_dir.mkdir(exist_ok=True)
 
-        # Timestamped filename
         filename = screenshot_dir / datetime.now().strftime(
             "Screenshot_%Y-%m-%d_%H-%M-%S.png"
         )
 
-        # Capture screen
         pyautogui.screenshot(str(filename))
 
         print(f"Screenshot saved: {filename}")

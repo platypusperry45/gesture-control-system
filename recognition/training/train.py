@@ -29,9 +29,9 @@ from recognition.training import (
 )
 
 from collections import Counter
+from backend.training_callback import BackendTrainingCallback
 
-
-def main():
+def main(training):
 
     print("=" * 60)
     print("Building dataset...")
@@ -70,8 +70,8 @@ def main():
     print("=" * 60)
 
     tf_builder = TensorFlowDatasetBuilder(
-        batch_size=8,
-        cache=False,
+        batch_size=32,
+        cache=True,
     )
 
     train_dataset = tf_builder.build(
@@ -115,14 +115,13 @@ def main():
     print("Starting training...")
     print("=" * 60)
 
+    callback = BackendTrainingCallback(training)
+
     history = trainer.fit(
-
         model,
-
         train_dataset,
-
         validation_dataset,
-
+        extra_callbacks=[callback],
     )
 
     print("=" * 60)
@@ -153,4 +152,8 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    from backend.training_manager import TrainingManager
+
+    training = TrainingManager()
+
+    main(training)

@@ -1,6 +1,4 @@
-import {
-    TextField,
-} from "@mui/material";
+import { TextField } from "@mui/material";
 
 export default function GestureSearch({
     value,
@@ -13,18 +11,14 @@ export default function GestureSearch({
 
             fullWidth
 
-            placeholder="Search gestures..."
+            placeholder="Search gesture..."
 
             value={value}
 
-            onChange={(e)=>
-
-                onChange(e.target.value)
-
-            }
+            onChange={(e) => onChange(e.target.value)}
 
             sx={{
-                mb:4,
+                mb: 4,
             }}
 
         />

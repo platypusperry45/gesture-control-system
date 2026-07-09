@@ -107,8 +107,8 @@ class GestureRecognitionModel(tf.keras.Model):
             "image": tf.zeros(
                 (
                     1,
-                    224,
-                    224,
+                    160,
+                    160,
                     3,
                 )
             ),

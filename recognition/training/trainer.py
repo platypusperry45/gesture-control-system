@@ -111,6 +111,7 @@ class Trainer:
         model: tf.keras.Model,
         train_dataset: tf.data.Dataset,
         validation_dataset: tf.data.Dataset,
+        extra_callbacks=None,
     ) -> tf.keras.callbacks.History:
 
         scheduler = SchedulerFactory(
@@ -126,12 +127,15 @@ class Trainer:
             early_stopping_config=self.early_stopping_config,
 
         ).default(
-
+    
             log_dir=self.log_dir,
 
             scheduler=scheduler,
 
         )
+        
+        if extra_callbacks:
+         callbacks.extend(extra_callbacks)
 
         history = model.fit(
 

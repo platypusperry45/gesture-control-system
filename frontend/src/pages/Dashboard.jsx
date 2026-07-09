@@ -4,9 +4,7 @@ import { Grid } from "@mui/material";
 
 import { motion } from "framer-motion";
 
-import api from "../services/api";
-
-import DashboardLayout from "../layouts/DashboardLayout.jsx";
+import DashboardLayout from "../components/layouts/DashboardLayout.jsx";
 
 import CameraCard from "../components/cards/CameraCard";
 import PredictionCard from "../components/cards/PredictionCard";
@@ -38,54 +36,68 @@ export default function Dashboard() {
 
         uptime: "--",
 
+        hand_detected: false,
+
     });
 
     const [history, setHistory] = useState([]);
 
     useEffect(() => {
 
-        async function load() {
+        const socket = new WebSocket(
+            `${import.meta.env.VITE_WS_URL}/ws/status`
+        );
 
-            try {
+        socket.onopen = () => {
 
-                const { data } = await api.get("/status");
+            console.log("WebSocket Connected");
 
-                setStatus(data);
+        };
 
-                if (data.prediction) {
+        socket.onmessage = (event) => {
 
-                    setHistory(previous => {
+            const data = JSON.parse(event.data);
 
-                        if (previous[0] === data.prediction)
-                            return previous;
+            setStatus(data);
 
-                        return [
+            if (data.prediction) {
 
-                            data.prediction,
+                setHistory((previous) => {
 
-                            ...previous,
+                    if (previous[0] === data.prediction)
+                        return previous;
 
-                        ].slice(0, 10);
+                    return [
 
-                    });
+                        data.prediction,
 
-                }
+                        ...previous,
+
+                    ].slice(0, 10);
+
+                });
 
             }
 
-            catch (err) {
+        };
 
-                console.log(err);
+        socket.onerror = (error) => {
 
-            }
+            console.error("WebSocket Error", error);
 
-        }
+        };
 
-        load();
+        socket.onclose = () => {
 
-        const timer = setInterval(load, 1000);
+            console.log("WebSocket Closed");
 
-        return () => clearInterval(timer);
+        };
+
+        return () => {
+
+            socket.close();
+
+        };
 
     }, []);
 

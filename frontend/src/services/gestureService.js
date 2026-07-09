@@ -5,17 +5,21 @@ export async function getGestures() {
     return data;
 }
 
-export async function createGesture(payload) {
-    const { data } = await api.post("/gestures", payload);
-    return data;
+export async function addGesture(name) {
+    return api.post("/gestures", { name });
 }
 
-export async function renameGesture(id, payload) {
-    const { data } = await api.put(`/gestures/${id}`, payload);
-    return data;
+export async function renameGesture(oldName, newName) {
+    return api.put(`/gestures/${oldName}`, {
+        new_name: newName,
+    });
 }
 
-export async function deleteGesture(id) {
-    const { data } = await api.delete(`/gestures/${id}`);
+export async function deleteGesture(name) {
+    return api.delete(`/gestures/${name}`);
+}
+
+export async function getDatasetSummary() {
+    const { data } = await api.get("/gestures/summary");
     return data;
 }

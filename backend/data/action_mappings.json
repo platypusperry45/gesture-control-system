@@ -1,0 +1,27 @@
+{
+    "open_palm": {
+        "type": "Media",
+        "action": "Mute",
+        "enabled": true
+    },
+    "fist": {
+        "type": "Media",
+        "action": "Play/Pause",
+        "enabled": true
+    },
+    "thumbs_up": {
+        "type": "Media",
+        "action": "Volume Up",
+        "enabled": true
+    },
+    "point": {
+        "type": "Media",
+        "action": "Previous Track",
+        "enabled": true
+    },
+    "peace": {
+        "type": "Media",
+        "action": "Next Track",
+        "enabled": true
+    }
+}

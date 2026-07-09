@@ -8,9 +8,6 @@ from __future__ import annotations
 import numpy as np
 import tensorflow as tf
 
-from recognition.training.augmenter import Augmenter
-from recognition.training.config import AugmentationConfig
-
 from .models import DatasetSplit
 
 
@@ -21,11 +18,11 @@ class TensorFlowDatasetBuilder:
 
     def __init__(
         self,
-        image_size: tuple[int, int] = (224, 224),
-        batch_size: int = 8,
+        image_size: tuple[int, int] = (160, 160),
+        batch_size: int = 32,
         shuffle_buffer: int = 1000,
-        cache: bool = False,
-        augment: bool = True,
+        cache: bool = True,
+        augment: bool = False,
     ):
 
         self.image_size = image_size
@@ -38,9 +35,12 @@ class TensorFlowDatasetBuilder:
 
         self.augment = augment
 
-        self.augmenter = Augmenter(
-            AugmentationConfig()
-        )
+        self.tf_augment = tf.keras.Sequential([
+            tf.keras.layers.RandomFlip("horizontal"),
+            tf.keras.layers.RandomRotation(0.05),
+            tf.keras.layers.RandomZoom(0.10),
+            tf.keras.layers.RandomContrast(0.10),
+        ])
 
     # =====================================================
     # Image Loading
@@ -155,68 +155,24 @@ class TensorFlowDatasetBuilder:
 
         return dataset
     
-    def _augment_numpy(
-        self,
-        image,
-    ):
-        """
-        Runs OpenCV augmentation on uint8 images.
-        Called through tf.py_function.
-        """
-        image = image.numpy()
-
-        # Convert from normalized float32 [0,1] to uint8 [0,255]
-        image = (image * 255.0).astype(np.uint8)
-
-        image = self.augmenter(image)
-
-        # Convert back to normalized float32
-        image = image.astype(np.float32) / 255.0
-
-        return image
-    
     def _augment_tf(
         self,
         inputs,
         label,
     ):
-        """
-        TensorFlow wrapper around the OpenCV augmenter.
-        """
 
-        image = tf.py_function(
-
-            func=self._augment_numpy,
-
-            inp=[inputs["image"]],
-
-            Tout=tf.float32,
-
-        )
-
-        image.set_shape(
-
-            (
-             self.image_size[0],
-             self.image_size[1],
-             3,
-            )
-
+        image = self.tf_augment(
+            inputs["image"],
+            training=True,
         )
 
         return (
-
-        {
-
+           {
             "image": image,
-
             "landmarks": inputs["landmarks"],
-
-        },
-
-        label,
-
-    )
+           },
+           label,
+        )
 
     def _prepare_dataset(
         self,

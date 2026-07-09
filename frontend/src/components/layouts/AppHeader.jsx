@@ -1,138 +1,134 @@
-import { useEffect, useState } from "react";
-
 import {
     AppBar,
     Avatar,
     Box,
     Chip,
+    Stack,
     Toolbar,
     Typography,
 } from "@mui/material";
 
-import BoltIcon from "@mui/icons-material/Bolt";
+import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
+
+const drawerWidth = 270;
 
 export default function AppHeader() {
-
-    const [time, setTime] = useState(
-        new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-        })
-    );
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTime(
-                new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                })
-            );
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
-
     return (
         <AppBar
             position="fixed"
             elevation={0}
+            sx={{
+                /**
+                 * Critical Layout Fix
+                 * -------------------
+                 * The AppBar must account for the permanent drawer.
+                 * This eliminates the visual right-shift and keeps
+                 * the header aligned with the page content.
+                 */
+                left: {
+                    xs: 0,
+                    lg: `${drawerWidth}px`,
+                },
+
+                width: {
+                    xs: "100%",
+                    lg: `calc(100% - ${drawerWidth}px)`,
+                },
+
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+
+                background: "rgba(8,12,20,.88)",
+
+                borderBottom:
+                    "1px solid rgba(255,255,255,.06)",
+
+                boxShadow: "none",
+
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
         >
             <Toolbar
                 sx={{
                     minHeight: 72,
-                    px: 4,
+                    px: {
+                        xs: 2,
+                        sm: 3,
+                        md: 4,
+                    },
                 }}
             >
-                {/* Logo */}
-
-                <Box
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
                     sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                        flexGrow: 1,
+                        width: "100%",
+                        minWidth: 0,
                     }}
                 >
-                    <Box
+                    {/* Left */}
+
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        alignItems="center"
                         sx={{
-                            width: 46,
-                            height: 46,
-                            borderRadius: 3,
-
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-
-                            background:
-                                "linear-gradient(135deg,#6366F1,#8B5CF6)",
-
-                            boxShadow:
-                                "0 8px 24px rgba(99,102,241,.35)",
+                            minWidth: 0,
+                            flex: 1,
                         }}
                     >
-                        <BoltIcon
+                        <Avatar
                             sx={{
-                                color: "#fff",
-                                fontSize: 24,
-                            }}
-                        />
-                    </Box>
-
-                    <Box>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 700,
-                                lineHeight: 1.1,
+                                bgcolor: "primary.main",
+                                width: 48,
+                                height: 48,
+                                flexShrink: 0,
                             }}
                         >
-                            Gesture AI
-                        </Typography>
+                            <PsychologyRoundedIcon />
+                        </Avatar>
 
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
+                        <Box
+                            sx={{
+                                minWidth: 0,
+                            }}
                         >
-                            Real-time Desktop Control
-                        </Typography>
-                    </Box>
-                </Box>
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                sx={{
+                                    fontWeight: 700,
+                                    letterSpacing: "-0.02em",
+                                }}
+                            >
+                                Gesture Control Dashboard
+                            </Typography>
 
-                {/* Status */}
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                noWrap
+                            >
+                                AI Powered Desktop Automation
+                            </Typography>
+                        </Box>
+                    </Stack>
 
-                <Chip
-                    label="Connected"
-                    color="success"
-                    size="small"
-                    sx={{
-                        mr: 2,
-                        fontWeight: 600,
-                    }}
-                />
+                    {/* Right */}
 
-                {/* Clock */}
-
-                <Typography
-                    color="text.secondary"
-                    sx={{
-                        mr: 3,
-                        fontWeight: 500,
-                    }}
-                >
-                    {time}
-                </Typography>
-
-                {/* Avatar */}
-
-                <Avatar
-                    sx={{
-                        bgcolor: "primary.main",
-                        fontWeight: 600,
-                    }}
-                >
-                    A
-                </Avatar>
+                    <Chip
+                        color="success"
+                        label="System Online"
+                        sx={{
+                            ml: 2,
+                            flexShrink: 0,
+                            fontWeight: 700,
+                            borderRadius: 999,
+                            px: 0.5,
+                        }}
+                    />
+                </Stack>
             </Toolbar>
         </AppBar>
     );

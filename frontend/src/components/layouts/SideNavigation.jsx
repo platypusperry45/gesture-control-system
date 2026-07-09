@@ -1,73 +1,105 @@
 import {
+    Avatar,
+    Box,
+    Chip,
+    Divider,
     Drawer,
-    Toolbar,
     List,
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Box,
+    Stack,
+    Toolbar,
     Typography,
 } from "@mui/material";
 
-import { NavLink } from "react-router-dom";
+import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
+import PanToolRoundedIcon from "@mui/icons-material/PanToolRounded";
+import KeyboardRoundedIcon from "@mui/icons-material/KeyboardRounded";
+import ModelTrainingRoundedIcon from "@mui/icons-material/ModelTrainingRounded";
+import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import PanToolIcon from "@mui/icons-material/PanTool";
-import KeyboardIcon from "@mui/icons-material/Keyboard";
-import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
-import SettingsIcon from "@mui/icons-material/Settings";
+import {
+    useLocation,
+    useNavigate,
+} from "react-router-dom";
 
 const drawerWidth = 270;
 
 const menu = [
     {
-        name: "Dashboard",
-        path: "/dashboard",
-        icon: <DashboardIcon />,
+        text: "Dashboard",
+        icon: <DashboardRoundedIcon />,
+        path: "/",
     },
     {
-        name: "Gestures",
+        text: "Gestures",
+        icon: <PanToolRoundedIcon />,
         path: "/gestures",
-        icon: <PanToolIcon />,
     },
     {
-        name: "Actions",
+        text: "Actions",
+        icon: <KeyboardRoundedIcon />,
         path: "/actions",
-        icon: <KeyboardIcon />,
     },
     {
-        name: "Training",
+        text: "Training",
+        icon: <ModelTrainingRoundedIcon />,
         path: "/training",
-        icon: <ModelTrainingIcon />,
     },
     {
-        name: "Analytics",
+        text: "Analytics",
+        icon: <AnalyticsRoundedIcon />,
         path: "/analytics",
-        icon: <AnalyticsIcon />,
     },
     {
-        name: "Settings",
+        text: "Settings",
+        icon: <SettingsRoundedIcon />,
         path: "/settings",
-        icon: <SettingsIcon />,
     },
 ];
 
 export default function SideNavigation() {
+
+    const navigate = useNavigate();
+
+    const location = useLocation();
+
     return (
+
         <Drawer
+
             variant="permanent"
+
             sx={{
+
                 width: drawerWidth,
+
                 flexShrink: 0,
 
                 "& .MuiDrawer-paper": {
+
                     width: drawerWidth,
-                    bgcolor: "#0B1020",
-                    borderRight: "1px solid rgba(255,255,255,.06)",
+
+                    bgcolor: "#0B1220",
+
+                    color: "white",
+
+                    borderRight:
+                        "1px solid rgba(255,255,255,.05)",
+
+                    overflowX: "hidden",
+
+                    boxSizing: "border-box",
+
                 },
+
             }}
+
         >
+
             <Toolbar />
 
             <Box
@@ -76,63 +108,208 @@ export default function SideNavigation() {
                     py: 2,
                 }}
             >
-                <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    sx={{
-                        letterSpacing: 2,
-                    }}
+
+                <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
                 >
-                    NAVIGATION
-                </Typography>
-            </Box>
 
-            <List>
-                {menu.map((item) => (
-                    <ListItemButton
-                        key={item.name}
-                        component={NavLink}
-                        to={item.path}
+                    <Avatar
                         sx={{
-                            mx: 2,
-                            my: 0.5,
-                            borderRadius: 3,
-                            height: 50,
-
-                            transition: "all .25s",
-
-                            "&:hover": {
-                                bgcolor: "rgba(255,255,255,.05)",
-                            },
-
-                            "&.active": {
-                                background:
-                                    "linear-gradient(135deg,#4F46E5,#7C3AED)",
-
-                                color: "#fff",
-
-                                boxShadow:
-                                    "0 10px 25px rgba(99,102,241,.35)",
-
-                                "& .MuiListItemIcon-root": {
-                                    color: "#fff",
-                                },
-                            },
+                            bgcolor: "primary.main",
+                            width: 52,
+                            height: 52,
                         }}
                     >
-                        <ListItemIcon
-                            sx={{
-                                minWidth: 42,
-                                color: "text.secondary",
-                            }}
-                        >
-                            {item.icon}
-                        </ListItemIcon>
+                        <BoltRoundedIcon />
+                    </Avatar>
 
-                        <ListItemText primary={item.name} />
-                    </ListItemButton>
-                ))}
+                    <Box>
+
+                        <Typography
+                            fontWeight={700}
+                            fontSize={18}
+                        >
+                            Gesture AI
+                        </Typography>
+
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                        >
+                            Desktop Automation
+                        </Typography>
+
+                    </Box>
+
+                </Stack>
+
+                <Chip
+                    label="AI Running"
+                    color="success"
+                    size="small"
+                    sx={{
+                        mt: 2,
+                        borderRadius: 2,
+                    }}
+                />
+
+            </Box>
+
+            <Divider
+                sx={{
+                    borderColor:
+                        "rgba(255,255,255,.05)",
+                }}
+            />
+
+            <List
+                sx={{
+                    mt: 2,
+                    px: 2,
+                }}
+            >
+
+                {
+
+                    menu.map((item) => {
+
+                        const selected =
+                            location.pathname === item.path;
+
+                        return (
+
+                            <ListItemButton
+
+                                key={item.text}
+
+                                selected={selected}
+
+                                onClick={() =>
+                                    navigate(item.path)
+                                }
+
+                                sx={{
+
+                                    borderRadius: 3,
+
+                                    py: 1.5,
+
+                                    mb: 1,
+
+                                    transition: ".25s",
+
+                                    "& .MuiListItemIcon-root": {
+
+                                        minWidth: 42,
+
+                                    },
+
+                                    "&.Mui-selected": {
+
+                                        background:
+                                            "linear-gradient(135deg,#2563EB,#3B82F6)",
+
+                                        color: "white",
+
+                                        boxShadow:
+                                            "0 12px 30px rgba(37,99,235,.35)",
+
+                                    },
+
+                                    "&.Mui-selected:hover": {
+
+                                        background:
+                                            "linear-gradient(135deg,#2563EB,#3B82F6)",
+
+                                    },
+
+                                    "&:hover": {
+
+                                        background:
+                                            "rgba(255,255,255,.06)",
+
+                                    },
+
+                                }}
+
+                            >
+
+                                <ListItemIcon
+
+                                    sx={{
+
+                                        color:
+                                            selected
+                                                ? "white"
+                                                : "#94A3B8",
+
+                                    }}
+
+                                >
+
+                                    {item.icon}
+
+                                </ListItemIcon>
+
+                                <ListItemText
+
+                                    primary={item.text}
+
+                                    primaryTypographyProps={{
+
+                                        fontWeight:
+                                            selected
+                                                ? 700
+                                                : 500,
+
+                                    }}
+
+                                />
+
+                            </ListItemButton>
+
+                        );
+
+                    })
+
+                }
+
             </List>
+
+            <Box
+                flex={1}
+            />
+
+            <Divider
+                sx={{
+                    borderColor:
+                        "rgba(255,255,255,.05)",
+                }}
+            />
+
+            <Box
+                p={3}
+            >
+
+                <Typography
+                    variant="caption"
+                    color="text.secondary"
+                >
+                    Gesture Control System
+                </Typography>
+
+                <Typography
+                    fontWeight={700}
+                >
+                    Version 2.0
+                </Typography>
+
+            </Box>
+
         </Drawer>
+
     );
+
 }

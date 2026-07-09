@@ -1,75 +1,268 @@
 import { useMemo, useState } from "react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
+import {
+    Box,
+    CircularProgress,
+    Grid,
+    Stack,
+    Typography,
+} from "@mui/material";
 
+import { motion } from "framer-motion";
+
+import DashboardLayout from "../components/layouts/DashboardLayout";
 import PageContainer from "../components/ui/PageContainer";
 import SectionHeader from "../components/ui/SectionHeader";
-import GradientButton from "../components/ui/GradientButton";
 
+import GestureToolbar from "../components/gestures/GestureToolbar";
 import GestureGrid from "../components/gestures/GestureGrid";
-import GestureSearch from "../components/gestures/GestureSearch";
+import GestureStats from "../components/gestures/GestureStats";
+
+import RenameGestureDialog from "../components/gestures/RenameGestureDialog";
+import DeleteGestureDialog from "../components/gestures/DeleteGestureDialog";
 
 import useGestures from "../hooks/useGestures";
+import useStatus from "../hooks/useStatus";
 
 export default function Gestures() {
 
     const {
+
         gestures,
+
+        loading,
+
+        error,
+
+        refresh,
+
     } = useGestures();
 
-    const [search,setSearch]=useState("");
+    const {
 
-    const filtered=useMemo(()=>{
+        status,
 
-        return gestures.filter(g=>
+    } = useStatus();
 
-            g.name.toLowerCase()
+    const [search, setSearch] = useState("");
 
-            .includes(search.toLowerCase())
+    const [filter, setFilter] = useState("All");
 
-        );
+    const [sort, setSort] = useState("name");
 
-    },[gestures,search]);
+    const [renameGesture, setRenameGesture] = useState(null);
 
-    return(
+    const [deleteGesture, setDeleteGesture] = useState(null);
+
+    function handleTest(gesture) {
+
+        console.log("Testing:", gesture);
+
+    }
+
+    const stats = useMemo(() => {
+
+        const values = Object.values(gestures);
+
+        return {
+
+            total: values.length,
+
+            enabled: values.filter(g => g.enabled).length,
+
+            disabled: values.filter(g => !g.enabled).length,
+
+            active: status?.prediction ?? "--",
+
+        };
+
+    }, [gestures, status]);
+
+    return (
 
         <DashboardLayout>
 
-            <PageContainer>
+            <motion.div
 
-                <SectionHeader
+                initial={{
 
-                    title="Gesture Library"
+                    opacity: 0,
 
-                    subtitle="Manage your AI gesture dataset."
+                    y: 25,
 
-                    action={
+                }}
 
-                        <GradientButton>
+                animate={{
 
-                            Add Gesture
+                    opacity: 1,
 
-                        </GradientButton>
+                    y: 0,
 
-                    }
+                }}
 
-                />
+                transition={{
 
-                <GestureSearch
+                    duration: .45,
 
-                    value={search}
+                }}
 
-                    onChange={setSearch}
+            >
 
-                />
+                <PageContainer>
 
-                <GestureGrid
+                    <SectionHeader
 
-                    gestures={filtered}
+                        title="Gesture Library"
 
-                />
+                        subtitle="Manage recognition classes, monitor live predictions and organize your AI gesture dataset."
 
-            </PageContainer>
+                    />
+
+                    <GestureStats stats={stats} />
+
+                    <Box mt={4}>
+
+                        <GestureToolbar
+
+                            search={search}
+
+                            setSearch={setSearch}
+
+                            filter={filter}
+
+                            setFilter={setFilter}
+
+                            sort={sort}
+
+                            setSort={setSort}
+
+                            refresh={refresh}
+
+                        />
+
+                    </Box>
+
+                    <Box mt={4}>
+
+                        {
+
+                            loading ?
+
+                                (
+
+                                    <Stack
+
+                                        py={12}
+
+                                        alignItems="center"
+
+                                    >
+
+                                        <CircularProgress />
+
+                                        <Typography
+
+                                            mt={2}
+
+                                            color="text.secondary"
+
+                                        >
+
+                                            Loading gestures...
+
+                                        </Typography>
+
+                                    </Stack>
+
+                                )
+
+                                :
+
+                                error ?
+
+                                    (
+
+                                        <Typography
+
+                                            color="error"
+
+                                        >
+
+                                            {error}
+
+                                        </Typography>
+
+                                    )
+
+                                    :
+
+                                    (
+
+                                        <GestureGrid
+
+                                            gestures={gestures}
+
+                                            search={search}
+
+                                            filter={filter}
+
+                                            sort={sort}
+
+                                            currentGesture={status?.prediction}
+
+                                            onRename={(gesture) =>
+
+                                                setRenameGesture(gesture)
+
+                                            }
+
+                                            onDelete={(gesture) =>
+
+                                                setDeleteGesture(gesture)
+
+                                            }
+
+                                            onTest={handleTest}
+
+                                        />
+
+                                    )
+
+                        }
+
+                    </Box>
+
+                    <RenameGestureDialog
+
+                        gesture={renameGesture}
+
+                        onClose={() =>
+
+                            setRenameGesture(null)
+
+                        }
+
+                        refresh={refresh}
+
+                    />
+
+                    <DeleteGestureDialog
+
+                        gesture={deleteGesture}
+
+                        onClose={() =>
+
+                            setDeleteGesture(null)
+
+                        }
+
+                        refresh={refresh}
+
+                    />
+
+                </PageContainer>
+
+            </motion.div>
 
         </DashboardLayout>
 

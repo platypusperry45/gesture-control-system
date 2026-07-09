@@ -4,7 +4,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
 
-import DashboardCard from "./DashboardCard";
+import DashboardCard from "../cards/DashboardCard";
 import GradientButton from "../ui/GradientButton";
 
 export default function ControlPanel() {

@@ -1,35 +1,61 @@
 import { useEffect, useState } from "react";
-import * as gestureService from "../services/gestureService";
+
+import { getGestures } from "../services/gestureService";
 
 export default function useGestures() {
 
     const [gestures, setGestures] = useState([]);
+
     const [loading, setLoading] = useState(true);
 
+    const [error, setError] = useState("");
+
     async function load() {
+
         try {
-            const data = await gestureService.getGestures();
+
+            setLoading(true);
+
+            const data = await getGestures();
+
             setGestures(data);
-        } catch {
-            // Temporary demo data
-            setGestures([
-                { id: 1, name: "Open Hand", samples: 128 },
-                { id: 2, name: "Thumbs Up", samples: 94 },
-                { id: 3, name: "Victory", samples: 117 },
-                { id: 4, name: "Fist", samples: 102 },
-            ]);
+
+            setError("");
+
         }
 
-        setLoading(false);
+        catch {
+
+            setError("Backend not connected");
+
+            setGestures([]);
+
+        }
+
+        finally {
+
+            setLoading(false);
+
+        }
+
     }
 
     useEffect(() => {
+
         load();
+
     }, []);
 
-    return {
-        gestures,
-        loading,
-        reload: load,
-    };
+    return{
+
+gestures,
+
+loading,
+
+error,
+
+refresh:load,
+
+};
 }
+    
