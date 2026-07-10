@@ -100,37 +100,45 @@ export default function TrainingLogs({
 
                 {logs.length === 0 ? (
 
-                    <Typography
-                        color="#8b95b3"
-                    >
+                    <Typography color="#8b95b3">
+
                         Waiting for training...
+
                     </Typography>
 
                 ) : (
 
                     logs.map((log, index) => (
 
-                        <Typography
-
+                        <Box
                             key={index}
-
-                            sx={{
-
-                                color: "#65ff8b",
-
-                                mb: .7,
-
-                                fontFamily: "Consolas",
-
-                                wordBreak: "break-word",
-
-                            }}
-
+                            sx={{ mb: 1.2 }}
                         >
 
-                            {log}
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: "#8b95b3",
+                                    display: "block",
+                                }}
+                            >
+                                [{log.time}] {log.level}
+                            </Typography>
 
-                        </Typography>
+                            <Typography
+                                sx={{
+                                    color:
+                                        log.level === "ERROR"
+                                            ? "#ff6b6b"
+                                            : "#65ff8b",
+                                    fontFamily: "Consolas",
+                                    wordBreak: "break-word",
+                                }}
+                            >
+                                {log.message}
+                            </Typography>
+
+                        </Box>
 
                     ))
 

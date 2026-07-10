@@ -70,22 +70,24 @@ class TrainingConfig:
     Training hyperparameters.
     """
 
+    # Training
     batch_size: int = 32
+    epochs: int = 50
 
-    epochs: int = 20
-
+    # Optimizer
     learning_rate: float = 1e-3
-
     weight_decay: float = 1e-4
 
+    # Stability
     gradient_clip_norm: float = 1.0
 
+    # Validation
     validation_frequency: int = 1
 
+    # Dataset
     shuffle_buffer_size: int = 2048
 
     random_seed: int = 42
-
 
 # ==========================================================
 # Scheduler
@@ -99,7 +101,7 @@ class SchedulerConfig:
 
     factor: float = 0.5
 
-    patience: int = 5
+    patience: int = 3
 
     min_learning_rate: float = 1e-6
 
@@ -114,7 +116,7 @@ class EarlyStoppingConfig:
     Early stopping configuration.
     """
 
-    monitor: str = "val_loss"
+    monitor: str = "val_accuracy"
 
     patience: int = 8
 
@@ -124,6 +126,7 @@ class EarlyStoppingConfig:
 # ==========================================================
 # Checkpoint
 # ==========================================================
+
 @dataclass(slots=True)
 class CheckpointConfig:
     """

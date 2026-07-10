@@ -1,223 +1,234 @@
-import { useMemo } from "react";
-
 import {
-    Box,
     Stack,
     Typography,
-    Chip,
 } from "@mui/material";
 
-import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 import {
-    ResponsiveContainer,
-    AreaChart,
-    Area,
     LineChart,
     Line,
-    CartesianGrid,
-    Tooltip,
     XAxis,
     YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    CartesianGrid,
 } from "recharts";
+
 
 import GlassCard from "../ui/GlassCard";
 
-export default function PerformanceAnalytics() {
 
-    const fpsData = useMemo(() => (
 
-        Array.from({ length: 20 }, (_, i) => ({
+export default function PerformanceAnalytics({ data }) {
 
-            frame: i + 1,
 
-            fps: 28 + Math.random() * 3,
+    const runtime = data?.runtime || {};
+    const training = data?.training || {};
 
-        }))
 
-    ), []);
 
-    const latencyData = useMemo(() => (
+    const fpsHistory =
+        runtime.fps_history || [];
 
-        Array.from({ length: 20 }, (_, i) => ({
 
-            frame: i + 1,
+    const confidenceHistory =
+        runtime.confidence_history || [];
 
-            latency: 18 + Math.random() * 8,
 
-        }))
 
-    ), []);
+    const length = Math.max(
+        fpsHistory.length,
+        confidenceHistory.length
+    );
+
+
+
+    const chartData = Array.from(
+        { length },
+        (_, index) => ({
+
+            time:index + 1,
+
+            fps:
+                fpsHistory[index] || 0,
+
+
+            confidence:
+                confidenceHistory[index]
+                    ? confidenceHistory[index] * 100
+                    : 0,
+
+        })
+    );
+
+
 
     return (
 
-        <Stack spacing={3}>
+        <GlassCard
 
-            {/* FPS History */}
+            sx={{
 
-            <GlassCard
-                sx={{
-                    p:3,
-                    minHeight:420,
-                }}
+                p:3,
+
+                height:380,
+
+            }}
+
+        >
+
+
+            <Stack
+
+                spacing={1}
+
+                mb={3}
+
             >
 
-                <Stack
+                <Typography
 
-                    direction="row"
+                    variant="h6"
 
-                    justifyContent="space-between"
-
-                    alignItems="center"
-
-                    mb={3}
+                    fontWeight={700}
 
                 >
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
+                    Model Performance
+
+                </Typography>
+
+
+
+                <Typography
+
+                    variant="body2"
+
+                    color="text.secondary"
+
+                >
+
+                    Live inference speed and confidence tracking
+
+                </Typography>
+
+
+            </Stack>
+
+
+
+
+            {
+
+                chartData.length > 0 ?
+
+
+                <ResponsiveContainer
+
+                    width="100%"
+
+                    height={260}
+
+                >
+
+
+                    <LineChart
+
+                        data={chartData}
+
                     >
 
-                        <SpeedRoundedIcon color="primary"/>
 
-                        <Typography
-                            variant="h6"
-                            fontWeight={700}
-                        >
-                            FPS History
-                        </Typography>
+                        <CartesianGrid
 
-                    </Stack>
+                            strokeDasharray="3 3"
 
-                    <Chip
-                        label="Realtime"
-                        color="success"
-                    />
+                        />
 
-                </Stack>
 
-                <Box sx={{ height:300 }}>
+                        <XAxis
 
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                    >
+                            dataKey="time"
 
-                        <AreaChart
-                            data={fpsData}
-                        >
+                        />
 
-                            <CartesianGrid strokeDasharray="4 4"/>
 
-                            <XAxis dataKey="frame"/>
+                        <YAxis/>
 
-                            <YAxis domain={[25,32]}/>
 
-                            <Tooltip/>
+                        <Tooltip/>
 
-                            <Area
 
-                                type="monotone"
 
-                                dataKey="fps"
 
-                                stroke="#3B82F6"
+                        <Line
 
-                                fill="#3B82F6"
+                            type="monotone"
 
-                                fillOpacity={0.25}
+                            dataKey="fps"
 
-                                strokeWidth={3}
+                            name="FPS"
 
-                            />
+                            dot={false}
 
-                        </AreaChart>
+                        />
 
-                    </ResponsiveContainer>
 
-                </Box>
 
-            </GlassCard>
+                        <Line
 
-            {/* Inference Latency */}
+                            type="monotone"
 
-            <GlassCard
-                sx={{
-                    p:3,
-                    minHeight:420,
-                }}
-            >
+                            dataKey="confidence"
+
+                            name="Confidence %"
+
+                            dot={false}
+
+                        />
+
+
+
+                    </LineChart>
+
+
+                </ResponsiveContainer>
+
+
+
+                :
+
 
                 <Stack
 
-                    direction="row"
+                    height="80%"
 
-                    justifyContent="space-between"
+                    justifyContent="center"
 
                     alignItems="center"
-
-                    mb={3}
 
                 >
 
                     <Typography
-                        variant="h6"
-                        fontWeight={700}
+
+                        color="text.secondary"
+
                     >
-                        Inference Latency
+
+                        Waiting for inference data...
+
                     </Typography>
 
-                    <Chip
-                        label="ms"
-                        color="warning"
-                    />
 
                 </Stack>
 
-                <Box sx={{ height:300 }}>
 
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                    >
+            }
 
-                        <LineChart
-                            data={latencyData}
-                        >
 
-                            <CartesianGrid strokeDasharray="4 4"/>
 
-                            <XAxis dataKey="frame"/>
+        </GlassCard>
 
-                            <YAxis/>
-
-                            <Tooltip/>
-
-                            <Line
-
-                                type="monotone"
-
-                                dataKey="latency"
-
-                                stroke="#F59E0B"
-
-                                strokeWidth={3}
-
-                                dot={false}
-
-                            />
-
-                        </LineChart>
-
-                    </ResponsiveContainer>
-
-                </Box>
-
-            </GlassCard>
-
-        </Stack>
 
     );
 

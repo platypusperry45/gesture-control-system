@@ -4,11 +4,6 @@
         "action": "Mute",
         "enabled": true
     },
-    "fist": {
-        "type": "Media",
-        "action": "Play/Pause",
-        "enabled": true
-    },
     "thumbs_up": {
         "type": "Media",
         "action": "Volume Up",
@@ -22,6 +17,11 @@
     "peace": {
         "type": "Media",
         "action": "Next Track",
+        "enabled": true
+    },
+    "okay": {
+        "type": "Media",
+        "action": "Play/Pause",
         "enabled": true
     }
 }

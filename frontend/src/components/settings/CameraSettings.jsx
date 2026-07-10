@@ -1,32 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     Stack,
     Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Slider,
-    Switch,
+    Chip,
+    LinearProgress,
     Divider,
-    Button,
 } from "@mui/material";
 
 import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded";
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
-import FlipRoundedIcon from "@mui/icons-material/FlipRounded";
-import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
+import FrontHandRoundedIcon from "@mui/icons-material/FrontHandRounded";
 
 import GlassCard from "../ui/GlassCard";
 
+import api from "../../services/api";
+
 export default function CameraSettings() {
 
-    const [camera, setCamera] = useState("Default Camera");
-    const [resolution, setResolution] = useState("1280x720");
-    const [fps, setFps] = useState(30);
-    const [mirror, setMirror] = useState(true);
-    const [autoExposure, setAutoExposure] = useState(true);
+    const [status, setStatus] = useState({
+
+        camera:false,
+        inference_running:false,
+        fps:0,
+        hand_detected:false,
+
+    });
+
+    useEffect(() => {
+
+        const load = async () => {
+
+            try{
+
+                const res = await api.get("/status");
+
+                setStatus(res.data);
+
+            }
+
+            catch(err){
+
+                console.error(err);
+
+            }
+
+        };
+
+        load();
+
+        const interval = setInterval(load,500);
+
+        return ()=>clearInterval(interval);
+
+    },[]);
 
     return (
 
@@ -57,146 +85,33 @@ export default function CameraSettings() {
 
             <Stack spacing={3}>
 
-                <FormControl fullWidth>
-
-                    <InputLabel>
-                        Camera
-                    </InputLabel>
-
-                    <Select
-
-                        value={camera}
-
-                        label="Camera"
-
-                        onChange={(e)=>setCamera(e.target.value)}
-
-                    >
-
-                        <MenuItem value="Default Camera">
-                            Default Camera
-                        </MenuItem>
-
-                        <MenuItem value="USB Camera">
-                            USB Camera
-                        </MenuItem>
-
-                        <MenuItem value="Virtual Camera">
-                            Virtual Camera
-                        </MenuItem>
-
-                    </Select>
-
-                </FormControl>
-
-                <FormControl fullWidth>
-
-                    <InputLabel>
-                        Resolution
-                    </InputLabel>
-
-                    <Select
-
-                        value={resolution}
-
-                        label="Resolution"
-
-                        onChange={(e)=>setResolution(e.target.value)}
-
-                    >
-
-                        <MenuItem value="640x480">
-                            640 × 480
-                        </MenuItem>
-
-                        <MenuItem value="1280x720">
-                            1280 × 720
-                        </MenuItem>
-
-                        <MenuItem value="1920x1080">
-                            1920 × 1080
-                        </MenuItem>
-
-                    </Select>
-
-                </FormControl>
-
-                <Divider/>
-
-                <Typography
-                    fontWeight={600}
-                >
-                    FPS Limit
-                </Typography>
-
-                <Slider
-
-                    value={fps}
-
-                    onChange={(e,v)=>setFps(v)}
-
-                    min={10}
-
-                    max={60}
-
-                    step={5}
-
-                    valueLabelDisplay="auto"
-
-                />
-
-                <Typography
-                    color="text.secondary"
-                >
-                    {fps} FPS
-                </Typography>
-
-                <Divider/>
-
                 <Stack
-
                     direction="row"
-
                     justifyContent="space-between"
-
                     alignItems="center"
-
                 >
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
+                    <Typography>
 
-                        <FlipRoundedIcon/>
+                        Camera
 
-                        <Typography>
+                    </Typography>
 
-                            Mirror Camera
+                    <Chip
 
-                        </Typography>
+                        color={status.camera ? "success":"error"}
 
-                    </Stack>
-
-                    <Switch
-
-                        checked={mirror}
-
-                        onChange={(e)=>setMirror(e.target.checked)}
+                        label={status.camera ? "Connected":"Offline"}
 
                     />
 
                 </Stack>
 
+                <Divider/>
+
                 <Stack
-
                     direction="row"
-
                     justifyContent="space-between"
-
-                    alignItems="center"
-
                 >
 
                     <Stack
@@ -209,17 +124,17 @@ export default function CameraSettings() {
 
                         <Typography>
 
-                            Auto Exposure
+                            Inference
 
                         </Typography>
 
                     </Stack>
 
-                    <Switch
+                    <Chip
 
-                        checked={autoExposure}
+                        color={status.inference_running ? "success":"default"}
 
-                        onChange={(e)=>setAutoExposure(e.target.checked)}
+                        label={status.inference_running ? "Running":"Stopped"}
 
                     />
 
@@ -227,19 +142,80 @@ export default function CameraSettings() {
 
                 <Divider/>
 
-                <Button
+                <Stack spacing={1}>
 
-                    fullWidth
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                    >
 
-                    variant="contained"
+                        <Stack
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                        >
 
-                    startIcon={<RestartAltRoundedIcon/>}
+                            <SpeedRoundedIcon/>
 
+                            <Typography>
+
+                                FPS
+
+                            </Typography>
+
+                        </Stack>
+
+                        <Typography fontWeight={700}>
+
+                            {status.fps.toFixed(1)}
+
+                        </Typography>
+
+                    </Stack>
+
+                    <LinearProgress
+
+                        variant="determinate"
+
+                        value={Math.min(status.fps*3.3,100)}
+
+                    />
+
+                </Stack>
+
+                <Divider/>
+
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
                 >
 
-                    Restart Camera
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                    >
 
-                </Button>
+                        <FrontHandRoundedIcon/>
+
+                        <Typography>
+
+                            Hand Detection
+
+                        </Typography>
+
+                    </Stack>
+
+                    <Chip
+
+                        color={status.hand_detected ? "success":"warning"}
+
+                        label={status.hand_detected ? "Detected":"Searching"}
+
+                    />
+
+                </Stack>
 
             </Stack>
 

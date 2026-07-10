@@ -1,0 +1,7 @@
+{
+    "theme": "Dark",
+    "notifications": true,
+    "autoSave": true,
+    "camera": 0,
+    "confidenceThreshold": 0.8
+}

@@ -1,17 +1,18 @@
-import { useState } from "react";
+import {useEffect,useState} from "react";
 
 import {
-    Box,
-    Stack,
-    Typography,
-    Switch,
-    FormControl,
-    Select,
-    MenuItem,
-    InputLabel,
-    Divider,
-    Button,
+Box,
+Stack,
+Typography,
+Switch,
+FormControl,
+Select,
+MenuItem,
+InputLabel,
+Divider,
+Button,
 } from "@mui/material";
+
 
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
@@ -20,216 +21,305 @@ import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
 import GlassCard from "../ui/GlassCard";
 
-export default function GeneralSettings() {
+import api from "../../services/api";
 
-    const [theme, setTheme] = useState("Dark");
 
-    const [notifications, setNotifications] = useState(true);
+export default function GeneralSettings(){
 
-    const [autoSave, setAutoSave] = useState(true);
 
-    return (
+const [settings,setSettings]=useState(null);
 
-        <GlassCard
-            sx={{
-                p: 3,
-                height: "100%",
-            }}
-        >
 
-            <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                mb={3}
-            >
 
-                <SettingsRoundedIcon color="primary" />
+useEffect(()=>{
 
-                <Typography
-                    variant="h6"
-                    fontWeight={700}
-                >
-                    General Settings
-                </Typography>
+loadSettings();
 
-            </Stack>
+},[]);
 
-            <Stack spacing={3}>
 
-                <Box>
 
-                    <Typography
-                        fontWeight={600}
-                        mb={1}
-                    >
-                        Theme
-                    </Typography>
+async function loadSettings(){
 
-                    <FormControl fullWidth>
+const res=await api.get("/settings");
 
-                        <InputLabel>Theme</InputLabel>
+setSettings(res.data);
 
-                        <Select
+}
 
-                            value={theme}
 
-                            label="Theme"
 
-                            onChange={(e)=>setTheme(e.target.value)}
+function update(key,value){
 
-                        >
+setSettings({
 
-                            <MenuItem value="Dark">
+...settings,
 
-                                Dark
+[key]:value
 
-                            </MenuItem>
+});
 
-                            <MenuItem value="Light">
+}
 
-                                Light
 
-                            </MenuItem>
 
-                            <MenuItem value="System">
+async function save(){
 
-                                System
+await api.post(
+"/settings",
+settings
+);
 
-                            </MenuItem>
+}
 
-                        </Select>
 
-                    </FormControl>
 
-                </Box>
+if(!settings)
+return null;
 
-                <Divider/>
 
-                <Stack
 
-                    direction="row"
+return (
 
-                    justifyContent="space-between"
+<GlassCard
+sx={{
+p:3,
+height:"100%"
+}}
+>
 
-                    alignItems="center"
 
-                >
+<Stack
+direction="row"
+spacing={1}
+alignItems="center"
+mb={3}
+>
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
+<SettingsRoundedIcon color="primary"/>
 
-                        <DarkModeRoundedIcon color="primary"/>
+<Typography
+variant="h6"
+fontWeight={700}
+>
+General Settings
+</Typography>
 
-                        <Typography>
+</Stack>
 
-                            Enable Dark Theme
 
-                        </Typography>
 
-                    </Stack>
+<Stack spacing={3}>
 
-                    <Switch
-                        checked={theme==="Dark"}
-                    />
 
-                </Stack>
+<FormControl fullWidth>
 
-                <Stack
+<InputLabel>
+Theme
+</InputLabel>
 
-                    direction="row"
 
-                    justifyContent="space-between"
+<Select
 
-                    alignItems="center"
+value={settings.theme}
 
-                >
+label="Theme"
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
+onChange={(e)=>
+update(
+"theme",
+e.target.value
+)
+}
 
-                        <NotificationsRoundedIcon color="primary"/>
+>
 
-                        <Typography>
 
-                            Notifications
+<MenuItem value="Dark">
+Dark
+</MenuItem>
 
-                        </Typography>
 
-                    </Stack>
+<MenuItem value="Light">
+Light
+</MenuItem>
 
-                    <Switch
 
-                        checked={notifications}
+<MenuItem value="System">
+System
+</MenuItem>
 
-                        onChange={(e)=>setNotifications(e.target.checked)}
 
-                    />
+</Select>
 
-                </Stack>
+</FormControl>
 
-                <Stack
 
-                    direction="row"
 
-                    justifyContent="space-between"
+<Divider/>
 
-                    alignItems="center"
 
-                >
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
+<Stack
+direction="row"
+justifyContent="space-between"
+alignItems="center"
+>
 
-                        <SaveRoundedIcon color="primary"/>
 
-                        <Typography>
+<Stack
+direction="row"
+spacing={1}
+alignItems="center"
+>
 
-                            Auto Save Settings
+<DarkModeRoundedIcon color="primary"/>
 
-                        </Typography>
+<Typography>
+Enable Dark Theme
+</Typography>
 
-                    </Stack>
+</Stack>
 
-                    <Switch
 
-                        checked={autoSave}
+<Switch
 
-                        onChange={(e)=>setAutoSave(e.target.checked)}
+checked={
+settings.theme==="Dark"
+}
 
-                    />
+onChange={(e)=>
 
-                </Stack>
+update(
+"theme",
+e.target.checked?
+"Dark":
+"Light"
+)
 
-                <Divider/>
+}
 
-                <Button
+/>
 
-                    fullWidth
+</Stack>
 
-                    variant="contained"
 
-                    size="large"
 
-                >
 
-                    Save Preferences
 
-                </Button>
+<Stack
+direction="row"
+justifyContent="space-between"
+alignItems="center"
+>
 
-            </Stack>
 
-        </GlassCard>
+<Stack
+direction="row"
+spacing={1}
+alignItems="center"
+>
 
-    );
+<NotificationsRoundedIcon color="primary"/>
+
+<Typography>
+Notifications
+</Typography>
+
+</Stack>
+
+
+<Switch
+
+checked={
+settings.notifications
+}
+
+onChange={(e)=>
+
+update(
+"notifications",
+e.target.checked
+)
+
+}
+
+/>
+
+</Stack>
+
+
+
+
+
+<Stack
+direction="row"
+justifyContent="space-between"
+alignItems="center"
+>
+
+
+<Stack
+direction="row"
+spacing={1}
+alignItems="center"
+>
+
+<SaveRoundedIcon color="primary"/>
+
+<Typography>
+Auto Save Settings
+</Typography>
+
+</Stack>
+
+
+<Switch
+
+checked={
+settings.autoSave
+}
+
+onChange={(e)=>
+
+update(
+"autoSave",
+e.target.checked
+)
+
+}
+
+/>
+
+</Stack>
+
+
+
+<Divider/>
+
+
+<Button
+
+fullWidth
+
+variant="contained"
+
+size="large"
+
+onClick={save}
+
+>
+
+Save Preferences
+
+</Button>
+
+
+</Stack>
+
+
+</GlassCard>
+
+);
 
 }

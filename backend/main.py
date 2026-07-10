@@ -8,8 +8,10 @@ import json
 import threading
 import time
 import traceback
+import psutil
+from datetime import datetime
 from pathlib import Path
-
+from collections import deque
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -83,6 +85,11 @@ system_state = {
     "hand_detected": False,
 }
 
+prediction_counts = {}
+
+fps_history = deque(maxlen=100)
+confidence_history = deque(maxlen=100)
+
 # ==========================================================
 # Inference Engine
 # ==========================================================
@@ -114,6 +121,9 @@ engine = InferenceEngine(
 camera_stream = CameraStreamer(
     engine,
     system_state,
+    prediction_counts,
+    fps_history,
+    confidence_history,
 )
 
 model_loader = ModelLoader(
@@ -206,6 +216,7 @@ def run_training():
     training.reset()
 
     training.running = True
+    training.started_at = datetime.now()
     training.completed = False
     training.error = None
 
@@ -226,7 +237,7 @@ def run_training():
         training.add_log(f"ERROR: {e}")
 
     finally:
-
+        training.finished_at = datetime.now()
         training.running = False
 
 # ==========================================================
@@ -710,7 +721,17 @@ def dataset_stats():
 @app.get("/training/history")
 def training_history():
 
-    return training.history
+    return {
+
+        "history": training.history,
+
+        "started_at": training.started_at,
+
+        "finished_at": training.finished_at,
+
+        "epochs": training.total_epochs,
+
+    }
 
 @app.websocket("/ws/training")
 async def websocket_training(websocket: WebSocket):
@@ -729,8 +750,11 @@ async def websocket_training(websocket: WebSocket):
                     "total_epochs": training.total_epochs,
                     "loss": training.loss,
                     "accuracy": training.accuracy,
+                    "val_loss": training.val_loss,
+                    "val_accuracy": training.val_accuracy,
                     "progress": training.progress,
                     "logs": training.logs[-30:],
+                    "history": training.history,
                 }
             )
 
@@ -740,6 +764,191 @@ async def websocket_training(websocket: WebSocket):
 
         print("Training dashboard disconnected.")
         
+
+
+@app.get("/analytics")
+def analytics():
+
+    import psutil
+    from datetime import datetime
+
+    classes = [
+        folder
+        for folder in DATASET_DIR.iterdir()
+        if folder.is_dir()
+    ]
+
+    total_images = 0
+
+    for folder in classes:
+
+        total_images += len(
+            [
+                f
+                for f in folder.iterdir()
+                if f.suffix.lower() in {
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".bmp",
+                    ".webp",
+                }
+            ]
+        )
+
+    return {
+
+        "dataset": {
+
+            "classes": len(classes),
+
+            "images": total_images,
+
+        },
+
+        "training": {
+
+            "epochs": training.total_epochs,
+
+            "accuracy": round(training.val_accuracy * 100, 2),
+
+            "loss": training.loss,
+
+            "val_loss": training.val_loss,
+
+            "history": training.history,
+
+        },
+
+        "runtime": {
+
+            "uptime": get_uptime(),
+
+            "fps": system_state["fps"],
+
+            "prediction": system_state["prediction"],
+
+            "confidence": round(
+                system_state["confidence"] * 100,
+                2,
+            ),
+
+            "camera": system_state["camera"],
+
+            "hand_detected": system_state["hand_detected"],
+
+            "prediction_distribution": prediction_counts,
+
+            "fps_history": list(fps_history),
+
+            "confidence_history": list(confidence_history),
+
+        },
+
+        "system": {
+
+            "cpu": round(
+                psutil.cpu_percent(),
+                1,
+            ),
+
+            "ram": round(
+                psutil.virtual_memory().percent,
+                1,
+            ),
+
+        },
+
+        "model": {
+
+            "loaded": model_loader.loaded,
+
+            "checkpoint": str(
+                model_loader.checkpoint_path
+            ),
+
+            "classes": len(CLASS_NAMES),
+
+        },
+
+        "last_updated": datetime.now().isoformat(),
+
+    }
+
+@app.get("/analytics/dataset")
+def analytics_dataset():
+
+    image_extensions = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".bmp",
+        ".webp",
+    }
+
+    data = []
+
+    for folder in sorted(DATASET_DIR.iterdir()):
+
+        if not folder.is_dir():
+            continue
+
+        count = sum(
+            1
+            for file in folder.iterdir()
+            if file.suffix.lower() in image_extensions
+        )
+
+        data.append({
+
+            "gesture": folder.name,
+            "count": count,
+
+        })
+
+    return data
+
+# ==========================================================
+# Settings
+# ==========================================================
+
+SETTINGS_FILE = Path("backend/data/settings.json")
+
+SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+DEFAULT_SETTINGS = {
+    "theme": "Dark",
+    "notifications": True,
+    "autosave": True,
+}
+
+if not SETTINGS_FILE.exists():
+    SETTINGS_FILE.write_text(
+        json.dumps(DEFAULT_SETTINGS, indent=4)
+    )
+
+
+@app.get("/settings")
+def get_settings():
+
+    with open(SETTINGS_FILE, "r") as f:
+        return json.load(f)
+
+
+@app.post("/settings")
+def save_settings(settings: dict):
+
+    with open(SETTINGS_FILE, "w") as f:
+        json.dump(
+            settings,
+            f,
+            indent=4,
+        )
+
+    return {
+        "success": True
+    }
+
 # ==========================================================
 # Run
 # ==========================================================

@@ -1,35 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     Stack,
     Typography,
-    TextField,
-    Switch,
-    Divider,
-    Button,
     Chip,
 } from "@mui/material";
 
-import CloudRoundedIcon from "@mui/icons-material/CloudRounded";
-import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
-import WifiRoundedIcon from "@mui/icons-material/WifiRounded";
-import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
+import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 
 import GlassCard from "../ui/GlassCard";
 
+import api from "../../services/api";
+
+
 export default function BackendSettings() {
 
-    const [backendUrl, setBackendUrl] = useState(
-        "http://127.0.0.1:8000"
-    );
+    const [status, setStatus] = useState(null);
 
-    const [socketUrl, setSocketUrl] = useState(
-        `${import.meta.env.VITE_WS_URL}/ws/status`
-    );
 
-    const [autoReconnect, setAutoReconnect] = useState(true);
+    useEffect(() => {
 
-    const [connected] = useState(true);
+        const fetchStatus = async () => {
+
+            try {
+
+                const response = await api.get("/health");
+
+                setStatus(response.data);
+
+            } catch(error) {
+
+                setStatus({
+                    status:"offline"
+                });
+
+            }
+
+        };
+
+
+        fetchStatus();
+
+
+        const interval = setInterval(
+            fetchStatus,
+            5000
+        );
+
+
+        return () => clearInterval(interval);
+
+
+    },[]);
+
+
 
     return (
 
@@ -41,173 +65,60 @@ export default function BackendSettings() {
         >
 
             <Stack
-
                 direction="row"
-
-                justifyContent="space-between"
-
+                spacing={1}
                 alignItems="center"
-
                 mb={3}
-
             >
 
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
+                <StorageRoundedIcon color="primary"/>
+
+                <Typography
+                    variant="h6"
+                    fontWeight={700}
                 >
-
-                    <CloudRoundedIcon color="primary"/>
-
-                    <Typography
-                        variant="h6"
-                        fontWeight={700}
-                    >
-                        Backend Settings
-                    </Typography>
-
-                </Stack>
-
-                <Chip
-
-                    label={connected ? "Connected" : "Disconnected"}
-
-                    color={connected ? "success" : "error"}
-
-                />
+                    Backend Settings
+                </Typography>
 
             </Stack>
+
 
             <Stack spacing={3}>
 
-                <TextField
 
-                    label="Backend API URL"
+                <Typography>
+                    API Connection
+                </Typography>
 
-                    fullWidth
 
-                    value={backendUrl}
+                <Chip
 
-                    onChange={(e)=>setBackendUrl(e.target.value)}
+                    label={
+                        status?.status === "healthy"
+                        ? "Backend Online"
+                        : "Backend Offline"
+                    }
 
-                />
-
-                <TextField
-
-                    label="WebSocket URL"
-
-                    fullWidth
-
-                    value={socketUrl}
-
-                    onChange={(e)=>setSocketUrl(e.target.value)}
+                    color={
+                        status?.status === "healthy"
+                        ? "success"
+                        : "error"
+                    }
 
                 />
 
-                <Divider/>
 
-                <Stack
-
-                    direction="row"
-
-                    justifyContent="space-between"
-
-                    alignItems="center"
-
+                <Typography
+                    color="text.secondary"
                 >
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
+                    FastAPI backend connection status.
 
-                        <SyncRoundedIcon/>
+                </Typography>
 
-                        <Typography>
-
-                            Auto Reconnect
-
-                        </Typography>
-
-                    </Stack>
-
-                    <Switch
-
-                        checked={autoReconnect}
-
-                        onChange={(e)=>setAutoReconnect(e.target.checked)}
-
-                    />
-
-                </Stack>
-
-                <Divider/>
-
-                <Stack spacing={1}>
-
-                    <Typography
-                        color="text.secondary"
-                    >
-                        API Status
-                    </Typography>
-
-                    <Typography
-                        fontWeight={700}
-                    >
-                        {connected ? "Online" : "Offline"}
-                    </Typography>
-
-                </Stack>
-
-                <Stack spacing={1}>
-
-                    <Typography
-                        color="text.secondary"
-                    >
-                        WebSocket
-                    </Typography>
-
-                    <Typography
-                        fontWeight={700}
-                    >
-                        Connected
-                    </Typography>
-
-                </Stack>
-
-                <Divider/>
-
-                <Button
-
-                    variant="contained"
-
-                    startIcon={<WifiRoundedIcon/>}
-
-                    fullWidth
-
-                >
-
-                    Test Connection
-
-                </Button>
-
-                <Button
-
-                    variant="outlined"
-
-                    startIcon={<LinkRoundedIcon/>}
-
-                    fullWidth
-
-                >
-
-                    Save Connection Settings
-
-                </Button>
 
             </Stack>
+
 
         </GlassCard>
 

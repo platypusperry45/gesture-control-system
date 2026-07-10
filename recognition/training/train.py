@@ -7,147 +7,213 @@ python -m recognition.training.train
 """
 
 from __future__ import annotations
-import os
 
+import os
+from collections import Counter
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
-import tensorflow as tf
+from backend.training_callback import BackendTrainingCallback
+
 from recognition.dataset import (
     DatasetBuilder,
     DatasetSplitter,
     TensorFlowDatasetBuilder,
 )
 
-from recognition.network import (
-    GestureRecognitionModel,
-)
+from recognition.network import GestureRecognitionModel
 
 from recognition.training import (
     Trainer,
     TrainingConfig,
 )
 
-from collections import Counter
-from backend.training_callback import BackendTrainingCallback
 
 def main(training):
 
-    print("=" * 60)
-    print("Building dataset...")
-    print("=" * 60)
+    try:
 
-    dataset_builder = DatasetBuilder()
-    dataset = dataset_builder.build()
-    print("\n================ LABEL ORDER (TRAINING) ================\n")
-    print(dataset_builder.label_encoder.classes_)
-    print("Num classes:", len(dataset_builder.label_encoder.classes_))
-    print("========================================================\n")
+        training.start()
 
-    print("=" * 60)
-    print("DATASET DEBUG")
-    print("=" * 60)
+        print("=" * 60)
+        print("Building dataset...")
+        print("=" * 60)
 
-    counts = Counter(sample.gesture for sample in dataset.samples)
+        dataset_builder = DatasetBuilder()
+        dataset = dataset_builder.build()
 
-    print(counts)
+        training.dataset_size = len(dataset.samples)
+        training.num_classes = len(dataset_builder.label_encoder.classes_)
+        training.class_names = list(dataset_builder.label_encoder.classes_)
 
-    print()
+        print("\n================ LABEL ORDER (TRAINING) ================\n")
+        print(dataset_builder.label_encoder.classes_)
+        print("Num classes:", len(dataset_builder.label_encoder.classes_))
+        print("========================================================\n")
 
-    print("Number of classes:", len(counts))
-    print("Classes:", sorted(counts.keys()))
-   
-    print("=" * 60)
+        counts = Counter(sample.gesture for sample in dataset.samples)
 
-    splitter = DatasetSplitter()
+        print("=" * 60)
+        print("DATASET DEBUG")
+        print("=" * 60)
+        print(counts)
+        print()
+        print("Number of classes:", len(counts))
+        print("Classes:", sorted(counts.keys()))
 
-    bundle = splitter.split(
-        dataset,
-    )
+        training.add_log(
+            f"Loaded dataset with {len(dataset.samples)} images across {len(counts)} classes."
+        )
 
-    print("=" * 60)
-    print("Creating TensorFlow datasets...")
-    print("=" * 60)
+        print("=" * 60)
+        print("Splitting dataset...")
+        print("=" * 60)
 
-    tf_builder = TensorFlowDatasetBuilder(
-        batch_size=32,
-        cache=True,
-    )
+        splitter = DatasetSplitter()
+        bundle = splitter.split(dataset)
 
-    train_dataset = tf_builder.build(
-        bundle.train,
-        training=True,
-    )
+        print("=" * 60)
+        print("Creating TensorFlow datasets...")
+        print("=" * 60)
 
-    validation_dataset = tf_builder.build(
-        bundle.validation,
-        training=False,
-    )
+        tf_builder = TensorFlowDatasetBuilder(
+            batch_size=32,
+            cache=True,
+        )
 
-    test_dataset = tf_builder.build(
-        bundle.test,
-        training=False,
-    )
+        train_dataset = tf_builder.build(
+            bundle.train,
+            training=True,
+        )
 
-    print("=" * 60)
-    print("Creating model...")
-    print("=" * 60)
+        validation_dataset = tf_builder.build(
+            bundle.validation,
+            training=False,
+        )
 
-    model = GestureRecognitionModel.build_model(
-        num_classes = len(dataset_builder.label_encoder.classes_),
-    )
-    
-    class_names = dataset_builder.label_encoder.classes_
+        test_dataset = tf_builder.build(
+            bundle.test,
+            training=False,
+        )
 
-    trainer = Trainer(
-        training_config=TrainingConfig(),
-    )
+        print("=" * 60)
+        print("Creating model...")
+        print("=" * 60)
 
-    print("=" * 60)
-    print("Compiling model...")
-    print("=" * 60)
+        model = GestureRecognitionModel.build_model(
+            num_classes=len(dataset_builder.label_encoder.classes_)
+        )
 
-    trainer.compile(
-        model,
-    )
+        trainer = Trainer(
+            training_config=TrainingConfig(),
+        )
 
-    print("=" * 60)
-    print("Starting training...")
-    print("=" * 60)
+        print("=" * 60)
+        print("Compiling model...")
+        print("=" * 60)
 
-    callback = BackendTrainingCallback(training)
+        trainer.compile(model)
 
-    history = trainer.fit(
-        model,
-        train_dataset,
-        validation_dataset,
-        extra_callbacks=[callback],
-    )
+        print("=" * 60)
+        print("Starting training...")
+        print("=" * 60)
 
-    print("=" * 60)
-    print("Evaluating...")
-    print("=" * 60)
+        training.add_log("Training started.")
 
-    trainer.evaluate(
-        model,
-        test_dataset,
-    )
+        callback = BackendTrainingCallback(training)
 
-    print("=" * 60)
-    print("Saving final model...")
-    print("=" * 60)
+        history = trainer.fit(
+            model,
+            train_dataset,
+            validation_dataset,
+            extra_callbacks=[callback],
+        )
 
-    trainer.save(
+        print("=" * 60)
+        print("Evaluating model...")
+        print("=" * 60)
 
-        model,
+        metrics = trainer.evaluate(
+            model,
+            test_dataset,
+        )
 
-        "recognition/artifacts/trained_models/gesture_recognition.h5",
+        print("\nTest Results")
+        print("-" * 40)
+        print(f"Loss: {metrics['loss']:.4f}")
+        print(f"Accuracy: {metrics['accuracy']:.4f}")
 
-    )
+        if "top3_accuracy" in metrics:
+            print(f"Top-3 Accuracy: {metrics['top3_accuracy']:.4f}")
 
-    print("=" * 60)
-    print("Training completed.")
-    print("=" * 60)
+        training.test_loss = float(metrics["loss"])
+        training.test_accuracy = float(metrics["accuracy"])
+
+        if "top3_accuracy" in metrics:
+            training.test_top3_accuracy = float(
+                metrics["top3_accuracy"]
+            )
+
+        training.add_log(
+            f"Test Accuracy: {metrics['accuracy']*100:.2f}%"
+        )
+
+        if "top3_accuracy" in metrics:
+            training.add_log(
+                f"Top-3 Accuracy: {metrics['top3_accuracy']*100:.2f}%"
+            )
+
+        # ----------------------------------------
+        # Save epoch history for frontend charts
+        # ----------------------------------------
+
+        if history.history:
+
+            epochs = len(history.history["loss"])
+
+            for i in range(epochs):
+
+                training.history.append(
+
+                    {
+                        "epoch": i + 1,
+                        "loss": float(history.history["loss"][i]),
+                        "accuracy": float(history.history["accuracy"][i]),
+                        "val_loss": float(history.history["val_loss"][i]),
+                        "val_accuracy": float(history.history["val_accuracy"][i]),
+                    }
+
+                )
+
+        print("=" * 60)
+        print("Saving model...")
+        print("=" * 60)
+
+        trainer.save(
+            model,
+            "recognition/artifacts/trained_models/gesture_recognition.h5",
+        )
+
+        training.add_log("Model saved successfully.")
+
+        training.finish()
+
+        print("=" * 60)
+        print("Training completed successfully.")
+        print("=" * 60)
+
+    except Exception as e:
+
+        training.running = False
+        training.completed = False
+        training.error = str(e)
+
+        training.add_log(
+            f"ERROR: {e}",
+            level="ERROR",
+        )
+
+        raise
 
 
 if __name__ == "__main__":

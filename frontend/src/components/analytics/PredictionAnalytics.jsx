@@ -1,217 +1,168 @@
-import { useMemo } from "react";
-
 import {
-    Box,
-    Stack,
     Typography,
-    Chip,
+    Stack,
 } from "@mui/material";
 
-import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
-
 import {
-    ResponsiveContainer,
     BarChart,
     Bar,
-    LineChart,
-    Line,
-    CartesianGrid,
-    Tooltip,
     XAxis,
     YAxis,
+    Tooltip,
+    ResponsiveContainer,
 } from "recharts";
+
 
 import GlassCard from "../ui/GlassCard";
 
-export default function PredictionAnalytics() {
 
-    const gestureData = useMemo(() => ([
-        { name: "Open", value: 624 },
-        { name: "Fist", value: 548 },
-        { name: "Peace", value: 493 },
-        { name: "Thumb", value: 412 },
-        { name: "Point", value: 331 },
-        { name: "Okay", value: 287 },
-    ]), []);
 
-    const confidenceData = useMemo(() => (
+export default function PredictionAnalytics({data}) {
 
-        Array.from({ length: 20 }, (_, i) => ({
-            frame: i + 1,
-            confidence: 88 + Math.random() * 10,
-        }))
 
-    ), []);
+    const distribution =
+        data?.runtime?.prediction_distribution || {};
+
+
+
+    const chartData =
+        Object.entries(distribution).map(
+            ([gesture,count])=>({
+
+                gesture,
+
+                count,
+
+            })
+        );
+
+
 
     return (
 
-        <Stack spacing={3}>
+        <GlassCard
 
-            {/* Prediction Distribution */}
+            sx={{
 
-            <GlassCard
-                sx={{
-                    p:3,
-                    minHeight:420,
-                }}
+                p:3,
+
+                height:360,
+
+            }}
+
+        >
+
+
+            <Stack
+
+                spacing={1}
+
+                mb={2}
+
             >
 
-                <Stack
+                <Typography
 
-                    direction="row"
+                    variant="h6"
 
-                    justifyContent="space-between"
-
-                    alignItems="center"
-
-                    mb={3}
+                    fontWeight={700}
 
                 >
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
+                    Prediction Distribution
+
+                </Typography>
+
+
+                <Typography
+
+                    variant="body2"
+
+                    color="text.secondary"
+
+                >
+
+                    Live gesture recognition frequency
+
+                </Typography>
+
+
+            </Stack>
+
+
+
+            {
+
+                chartData.length === 0 ?
+
+
+                (
+
+                    <Typography
+
+                        color="text.secondary"
+
                     >
 
-                        <AnalyticsRoundedIcon color="primary"/>
+                        No predictions yet
 
-                        <Typography
-                            variant="h6"
-                            fontWeight={700}
-                        >
-                            Prediction Distribution
-                        </Typography>
+                    </Typography>
 
-                    </Stack>
+                )
 
-                    <Chip
-                        label="Live"
-                        color="success"
-                    />
 
-                </Stack>
+                :
 
-                <Box
-                    sx={{
-                        height:300,
-                    }}
-                >
+                (
 
                     <ResponsiveContainer
+
                         width="100%"
-                        height="100%"
+
+                        height="85%"
+
                     >
 
                         <BarChart
-                            data={gestureData}
+
+                            data={chartData}
+
                         >
 
-                            <CartesianGrid strokeDasharray="4 4"/>
+                            <XAxis
 
-                            <XAxis dataKey="name"/>
+                                dataKey="gesture"
+
+                            />
+
 
                             <YAxis/>
 
+
                             <Tooltip/>
 
+
                             <Bar
-                                dataKey="value"
+
+                                dataKey="count"
+
                                 radius={[8,8,0,0]}
-                                fill="#6366F1"
+
                             />
+
 
                         </BarChart>
 
-                    </ResponsiveContainer>
-
-                </Box>
-
-            </GlassCard>
-
-            {/* Confidence Trend */}
-
-            <GlassCard
-                sx={{
-                    p:3,
-                    minHeight:420,
-                }}
-            >
-
-                <Stack
-
-                    direction="row"
-
-                    justifyContent="space-between"
-
-                    alignItems="center"
-
-                    mb={3}
-
-                >
-
-                    <Typography
-                        variant="h6"
-                        fontWeight={700}
-                    >
-                        Confidence Trend
-                    </Typography>
-
-                    <Chip
-                        label="Realtime"
-                        color="primary"
-                    />
-
-                </Stack>
-
-                <Box
-                    sx={{
-                        height:300,
-                    }}
-                >
-
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                    >
-
-                        <LineChart
-                            data={confidenceData}
-                        >
-
-                            <CartesianGrid strokeDasharray="4 4"/>
-
-                            <XAxis dataKey="frame"/>
-
-                            <YAxis
-                                domain={[80,100]}
-                            />
-
-                            <Tooltip/>
-
-                            <Line
-
-                                type="monotone"
-
-                                dataKey="confidence"
-
-                                stroke="#22C55E"
-
-                                strokeWidth={3}
-
-                                dot={false}
-
-                            />
-
-                        </LineChart>
 
                     </ResponsiveContainer>
 
-                </Box>
+                )
 
-            </GlassCard>
+            }
 
-        </Stack>
+
+
+        </GlassCard>
 
     );
 

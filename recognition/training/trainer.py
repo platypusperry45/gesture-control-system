@@ -157,19 +157,15 @@ class Trainer:
     # Evaluate
     # =====================================================
 
-    def evaluate(
-        self,
-        model: tf.keras.Model,
-        test_dataset: tf.data.Dataset,
-    ):
+    def evaluate(self, model, test_dataset):
 
-        return model.evaluate(
-
+        results = model.evaluate(
             test_dataset,
-
             verbose=1,
-
+            return_dict=True,
         )
+
+        return results
 
     # =====================================================
     # Predict
@@ -195,13 +191,24 @@ class Trainer:
 
 
     def save(self, model, path):
+        """
+        Save the trained model in multiple formats.
+        """
 
         path = Path(path)
-
         path.parent.mkdir(parents=True, exist_ok=True)
 
+        keras_path = path.with_suffix(".keras")
         weights_path = path.with_suffix(".weights.h5")
 
+        # Native Keras format (recommended)
+        model.save(keras_path)
+
+        # Weights only
         model.save_weights(weights_path)
 
-        print(f"Model weights saved to {weights_path}")
+        print("=" * 60)
+        print("Model saved successfully")
+        print(f"Keras Model : {keras_path}")
+        print(f"Weights     : {weights_path}")
+        print("=" * 60)

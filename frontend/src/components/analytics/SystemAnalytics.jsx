@@ -1,160 +1,188 @@
 import {
-    Grid,
     Stack,
     Typography,
     Chip,
-    LinearProgress,
-    Box,
+    Grid,
 } from "@mui/material";
 
-import MemoryRoundedIcon from "@mui/icons-material/MemoryRounded";
-import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
-import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
-import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
-import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
-import { motion } from "framer-motion";
+import MemoryRoundedIcon from "@mui/icons-material/MemoryRounded";
+import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded";
+import ModelTrainingRoundedIcon from "@mui/icons-material/ModelTrainingRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import BackHandRoundedIcon from "@mui/icons-material/BackHandRounded";
+
 
 import GlassCard from "../ui/GlassCard";
 
-export default function SystemAnalytics() {
 
-    const stats = [
 
-        {
-            title: "CPU Usage",
-            value: "32%",
-            progress: 32,
-            icon: <MemoryRoundedIcon color="primary" />,
-            color: "#3B82F6",
-        },
+export default function SystemAnalytics({ data }) {
 
-        {
-            title: "GPU Usage",
-            value: "58%",
-            progress: 58,
-            icon: <PsychologyRoundedIcon color="secondary" />,
-            color: "#8B5CF6",
-        },
+
+    const runtime = data?.runtime || {};
+    const system = data?.system || {};
+    const model = data?.model || {};
+
+
+
+    const cards = [
 
         {
-            title: "Memory Usage",
-            value: "4.8 GB / 16 GB",
-            progress: 30,
-            icon: <StorageRoundedIcon color="warning" />,
-            color: "#F59E0B",
+            title:"CPU Usage",
+            value:`${system.cpu ?? 0}%`,
+            icon:<MemoryRoundedIcon color="primary"/>,
         },
 
-        {
-            title: "Camera",
-            value: "Connected",
-            chip: "ONLINE",
-            icon: <VideocamRoundedIcon color="success" />,
-        },
 
         {
-            title: "Inference Engine",
-            value: "Running",
-            chip: "ACTIVE",
-            icon: <CheckCircleRoundedIcon color="success" />,
+            title:"RAM Usage",
+            value:`${system.ram ?? 0}%`,
+            icon:<MemoryRoundedIcon color="secondary"/>,
         },
 
+
         {
-            title: "Backend Uptime",
-            value: "05h 42m",
-            icon: <ScheduleRoundedIcon color="primary" />,
+            title:"Uptime",
+            value:runtime.uptime || "00:00:00",
+            icon:<AccessTimeRoundedIcon color="success"/>,
         },
+
+
+        {
+            title:"Camera",
+            value:runtime.camera ? "Active":"Offline",
+            icon:<CameraAltRoundedIcon color="warning"/>,
+        },
+
+
+        {
+            title:"Model",
+            value:model.loaded ? "Loaded":"Not Loaded",
+            icon:<ModelTrainingRoundedIcon color="info"/>,
+        },
+
+
+        {
+            title:"Hand Detection",
+            value:runtime.hand_detected
+                ? "Detected"
+                :"Searching",
+            icon:<BackHandRoundedIcon color="error"/>,
+        },
+
 
     ];
 
+
+
     return (
 
-        <Grid
-            container
-            spacing={3}
+        <GlassCard
+
+            sx={{
+
+                p:3,
+
+            }}
+
         >
 
-            {
 
-                stats.map((item, index) => (
+            <Stack
 
-                    <Grid
-                        key={index}
-                        size={{
-                            xs:12,
-                            sm:6,
-                            lg:4,
-                        }}
-                    >
+                spacing={1}
 
-                        <motion.div
+                mb={3}
 
-                            initial={{
-                                opacity:0,
-                                y:20,
-                            }}
+            >
 
-                            animate={{
-                                opacity:1,
-                                y:0,
-                            }}
+                <Typography
 
-                            transition={{
-                                delay:index*0.05,
-                            }}
+                    variant="h6"
+
+                    fontWeight={700}
+
+                >
+
+                    System Analytics
+
+                </Typography>
+
+
+                <Typography
+
+                    variant="body2"
+
+                    color="text.secondary"
+
+                >
+
+                    Live hardware and inference status
+
+                </Typography>
+
+
+            </Stack>
+
+
+
+            <Grid
+
+                container
+
+                spacing={2}
+
+            >
+
+
+                {
+                    cards.map(
+                        (card,index)=>(
+
+
+                        <Grid
+
+                            item
+
+                            xs={12}
+
+                            sm={6}
+
+                            md={4}
+
+                            key={index}
 
                         >
 
-                            <GlassCard
+
+                            <Stack
+
+                                direction="row"
+
+                                alignItems="center"
+
+                                spacing={2}
 
                                 sx={{
 
-                                    p:3,
+                                    p:2,
 
-                                    height:180,
+                                    borderRadius:2,
 
-                                    display:"flex",
-
-                                    flexDirection:"column",
-
-                                    justifyContent:"space-between",
+                                    background:
+                                    "rgba(255,255,255,0.04)",
 
                                 }}
 
                             >
 
-                                <Stack
 
-                                    direction="row"
+                                {card.icon}
 
-                                    justifyContent="space-between"
 
-                                    alignItems="center"
+                                <Stack>
 
-                                >
-
-                                    {item.icon}
-
-                                    {
-
-                                        item.chip &&
-
-                                        <Chip
-
-                                            label={item.chip}
-
-                                            color="success"
-
-                                            size="small"
-
-                                        />
-
-                                    }
-
-                                </Stack>
-
-                                <Box>
 
                                     <Typography
 
@@ -164,69 +192,44 @@ export default function SystemAnalytics() {
 
                                     >
 
-                                        {item.title}
+                                        {card.title}
 
                                     </Typography>
+
+
 
                                     <Typography
 
-                                        variant="h5"
-
                                         fontWeight={700}
-
-                                        mt={1}
 
                                     >
 
-                                        {item.value}
+                                        {card.value}
 
                                     </Typography>
 
-                                </Box>
 
-                                {
+                                </Stack>
 
-                                    item.progress !== undefined &&
 
-                                    <LinearProgress
 
-                                        variant="determinate"
+                            </Stack>
 
-                                        value={item.progress}
 
-                                        sx={{
+                        </Grid>
 
-                                            mt:2,
 
-                                            height:8,
+                    ))
 
-                                            borderRadius:10,
+                }
 
-                                            background:"rgba(255,255,255,.08)",
 
-                                            "& .MuiLinearProgress-bar":{
 
-                                                background:item.color,
+            </Grid>
 
-                                            },
 
-                                        }}
+        </GlassCard>
 
-                                    />
-
-                                }
-
-                            </GlassCard>
-
-                        </motion.div>
-
-                    </Grid>
-
-                ))
-
-            }
-
-        </Grid>
 
     );
 
